@@ -3,247 +3,405 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CareerRadar — Job Aggregator & Application Tracker</title>
+  <title>CareerRadar — Job Intelligence & Application Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    body { font-family: 'Inter', sans-serif; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+    .tab-active { border-bottom: 2px solid #4f46e5; color: #4f46e5; font-weight: 600; }
+    .tab-inactive { border-bottom: 2px solid transparent; color: #64748b; }
+    .tab-inactive:hover { color: #0f172a; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen">
+<body class="bg-[#F8FAFC] text-slate-800 min-h-screen antialiased">
 
-  <!-- Navbar -->
-  <header class="bg-slate-900 text-white sticky top-0 z-20 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-wrap justify-between items-center gap-3">
-      <div>
-        <div class="flex items-center gap-2">
-          <span class="bg-indigo-500 text-white text-xs font-bold px-2 py-0.5 rounded">SQL + ETL</span>
-          <h1 class="text-lg font-bold tracking-tight">CareerRadar Dashboard</h1>
+  <!-- Top Navigation Bar -->
+  <header class="bg-white border-b border-slate-200/80 sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-bold shadow-sm shadow-indigo-200">
+          CR
         </div>
-        <p class="text-xs text-slate-400 mt-0.5">IT/Tech • Data/Digital • MT/ODP • Operations</p>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold text-slate-900 tracking-tight">CareerRadar</h1>
+            <span class="hidden sm:inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/60">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Live Sync
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-500 hidden sm:block">Automated Job Discovery & Personal Application Workspace</p>
+        </div>
       </div>
-      <div class="flex items-center gap-2">
-        <button onclick="openAddModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm font-medium px-3.5 py-2 rounded-lg transition">
-          + Tambah Lowongan
+
+      <div class="flex items-center gap-2.5">
+        <button onclick="openAddModal()" class="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs sm:text-sm font-semibold px-3.5 py-2 rounded-xl shadow-sm shadow-indigo-200 transition">
+          <span>+</span>
+          <span>Catat Lowongan / Lamaran</span>
         </button>
-        <button onclick="fetchAllData()" class="bg-slate-800 hover:bg-slate-700 border border-slate-700 text-white text-xs sm:text-sm font-medium px-3.5 py-2 rounded-lg transition">
-          ↻ Refresh
+        <button onclick="fetchAllData()" title="Muat Ulang Data" class="p-2 text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200/70 rounded-xl transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
         </button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-    <!-- Banner Peringatan Konfigurasi -->
-    <div id="configAlert" class="hidden bg-amber-50 border border-amber-300 text-amber-800 px-4 py-3 rounded-xl text-xs">
-      <strong>Konfigurasi Diperlukan:</strong> Ganti nilai <code>SUPABASE_PUBLISHABLE_KEY</code> di dalam kode <code>frontend/index.html</code> dengan Publishable Key dari dashboard Supabase Anda.
+    <!-- Alert Konfigurasi -->
+    <div id="configAlert" class="hidden bg-amber-50 border border-amber-200 text-amber-900 px-4 py-3 rounded-xl text-xs flex items-center justify-between">
+      <span><strong>Konfigurasi Diperlukan:</strong> Tempelkan <code>SUPABASE_PUBLISHABLE_KEY</code> Anda pada baris konfigurasi JavaScript di dalam <code>frontend/index.html</code>.</span>
     </div>
 
-    <!-- KPI Cards & Funnel Chart -->
-    <section class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-      <!-- 4 KPI Metrics -->
-      <div class="lg:col-span-2 grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-          <p class="text-xs font-medium text-slate-500">Total Lowongan</p>
-          <p id="kpiTotal" class="text-2xl font-bold text-slate-900 mt-2">0</p>
-          <span class="text-[11px] text-slate-400 mt-1">Tersimpan di SQL</span>
+    <!-- Ringkasan Metrik (KPI Cards) -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-medium text-slate-500">Radar Lowongan Aktif</span>
+          <span class="p-1.5 rounded-lg bg-slate-100 text-slate-600 text-xs">📡</span>
         </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-          <p class="text-xs font-medium text-slate-500">Sudah Dilamar</p>
-          <p id="kpiApplied" class="text-2xl font-bold text-indigo-600 mt-2">0</p>
-          <span class="text-[11px] text-slate-400 mt-1">Status Applied+</span>
-        </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-          <p class="text-xs font-medium text-slate-500">Tes & Interview</p>
-          <p id="kpiProgress" class="text-2xl font-bold text-amber-600 mt-2">0</p>
-          <span class="text-[11px] text-slate-400 mt-1">Tahap seleksi aktif</span>
-        </div>
-        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-          <p class="text-xs font-medium text-slate-500">Conversion Rate</p>
-          <p id="kpiRate" class="text-2xl font-bold text-emerald-600 mt-2">0%</p>
-          <span class="text-[11px] text-slate-400 mt-1">Applied &rarr; Interview</span>
-        </div>
+        <p id="kpiRadar" class="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">0</p>
+        <p class="text-[11px] text-slate-400 mt-1">Belum dilamar (di-refresh harian)</p>
       </div>
 
-      <!-- Mini Chart Distribusi Klaster -->
-      <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
-        <h2 class="text-xs font-semibold text-slate-600 mb-2">Distribusi Lowongan per Klaster</h2>
-        <div class="h-32">
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-medium text-slate-500">Lamaran Saya</span>
+          <span class="p-1.5 rounded-lg bg-indigo-50 text-indigo-600 text-xs">📨</span>
+        </div>
+        <p id="kpiApplied" class="text-2xl sm:text-3xl font-bold text-indigo-600 mt-2">0</p>
+        <p class="text-[11px] text-slate-400 mt-1">Tersimpan permanen di tracker</p>
+      </div>
+
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-medium text-slate-500">Tes & Wawancara</span>
+          <span class="p-1.5 rounded-lg bg-amber-50 text-amber-600 text-xs">🎯</span>
+        </div>
+        <p id="kpiProgress" class="text-2xl sm:text-3xl font-bold text-amber-600 mt-2">0</p>
+        <p class="text-[11px] text-slate-400 mt-1">Tahap seleksi berjalan</p>
+      </div>
+
+      <div class="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200/80 shadow-xs">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-medium text-slate-500">Interview Rate</span>
+          <span class="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 text-xs">📈</span>
+        </div>
+        <p id="kpiRate" class="text-2xl sm:text-3xl font-bold text-emerald-600 mt-2">0%</p>
+        <p class="text-[11px] text-slate-400 mt-1">Rasio lolos seleksi awal</p>
+      </div>
+    </section>
+
+    <!-- Navigasi Tab Utama (Radar vs Lamaran Saya) -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-xs overflow-hidden">
+      <div class="px-4 sm:px-6 border-b border-slate-200 flex flex-wrap items-center justify-between gap-4 bg-slate-50/50">
+        <nav class="flex space-x-6 -mb-px" aria-label="Tabs">
+          <button id="tabBtnRadar" onclick="switchMainTab('radar')" class="tab-active py-4 px-1 text-sm flex items-center gap-2 transition">
+            <span>Radar Lowongan Baru</span>
+            <span id="badgeRadar" class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+          </button>
+          <button id="tabBtnApplied" onclick="switchMainTab('applied')" class="tab-inactive py-4 px-1 text-sm flex items-center gap-2 transition">
+            <span>Lamaran Saya</span>
+            <span id="badgeApplied" class="bg-slate-200 text-slate-700 text-xs font-bold px-2 py-0.5 rounded-full">0</span>
+          </button>
+        </nav>
+
+        <button onclick="toggleChartPanel()" class="text-xs font-medium text-slate-500 hover:text-indigo-600 py-2 flex items-center gap-1">
+          <span id="chartToggleText">Tampilkan Grafik Distribusi</span>
+          <span>▾</span>
+        </button>
+      </div>
+
+      <!-- Panel Grafik Collapsible -->
+      <div id="chartPanel" class="hidden p-5 border-b border-slate-100 bg-slate-50/40">
+        <div class="max-w-2xl mx-auto h-44">
           <canvas id="clusterChart"></canvas>
         </div>
       </div>
-    </section>
 
-    <!-- Filter & Search Bar -->
-    <section class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-3">
-      <div class="flex flex-wrap gap-2 border-b border-slate-100 pb-3" id="clusterTabs">
-        <button onclick="setCluster('')" class="cluster-btn bg-slate-900 text-white text-xs font-medium px-3.5 py-1.5 rounded-full" data-val="">Semua Klaster</button>
-        <button onclick="setCluster('IT/Tech')" class="cluster-btn bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-medium px-3.5 py-1.5 rounded-full" data-val="IT/Tech">IT/Tech</button>
-        <button onclick="setCluster('Data/Digital')" class="cluster-btn bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-medium px-3.5 py-1.5 rounded-full" data-val="Data/Digital">Data/Digital</button>
-        <button onclick="setCluster('MT/ODP')" class="cluster-btn bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-medium px-3.5 py-1.5 rounded-full" data-val="MT/ODP">MT / ODP</button>
-        <button onclick="setCluster('Operations')" class="cluster-btn bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-medium px-3.5 py-1.5 rounded-full" data-val="Operations">Operations</button>
+      <!-- ===================================================================== -->
+      <!-- VIEW 1: RADAR LOWONGAN BARU (BELUM DILAMAR)                           -->
+      <!-- ===================================================================== -->
+      <div id="viewRadar" class="p-4 sm:p-6 space-y-4">
+        <!-- Filter Klaster -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap gap-1.5" id="radarClusterTabs">
+            <button onclick="setRadarCluster('')" class="r-cluster-btn bg-slate-900 text-white text-xs font-medium px-3 py-1.5 rounded-lg" data-val="">Semua</button>
+            <button onclick="setRadarCluster('IT/Tech')" class="r-cluster-btn bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-medium px-3 py-1.5 rounded-lg" data-val="IT/Tech">IT/Tech</button>
+            <button onclick="setRadarCluster('Data/Digital')" class="r-cluster-btn bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-medium px-3 py-1.5 rounded-lg" data-val="Data/Digital">Data/Digital</button>
+            <button onclick="setRadarCluster('MT/ODP')" class="r-cluster-btn bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-medium px-3 py-1.5 rounded-lg" data-val="MT/ODP">MT / ODP / FG</button>
+            <button onclick="setRadarCluster('Operations')" class="r-cluster-btn bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-medium px-3 py-1.5 rounded-lg" data-val="Operations">Operations</button>
+            <button onclick="setRadarCluster('Other')" class="r-cluster-btn bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-medium px-3 py-1.5 rounded-lg" data-val="Other">Umum / Lainnya</button>
+          </div>
+          <span id="radarCountLabel" class="text-xs text-slate-400">Memuat...</span>
+        </div>
+
+        <!-- Bar Pencarian & Filter -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+          <input type="text" id="radarSearch" onkeyup="renderRadarTable()" placeholder="Cari posisi, perusahaan, atau kota..."
+                 class="sm:col-span-2 border border-slate-200 bg-slate-50/60 focus:bg-white rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500" />
+          <select id="radarMode" onchange="renderRadarTable()" class="border border-slate-200 bg-slate-50/60 rounded-xl px-3 py-2 text-sm text-slate-700">
+            <option value="">Semua Sistem Kerja</option>
+            <option value="Onsite">Onsite</option>
+            <option value="Hybrid">Hybrid</option>
+            <option value="Remote">Remote</option>
+          </select>
+          <select id="radarSource" onchange="renderRadarTable()" class="border border-slate-200 bg-slate-50/60 rounded-xl px-3 py-2 text-sm text-slate-700">
+            <option value="">Semua Sumber Portal</option>
+            <option value="Linkedin">LinkedIn</option>
+            <option value="Google">Google Jobs (JobStreet/Glints/dll)</option>
+            <option value="Manual">Input Manual</option>
+          </select>
+        </div>
+
+        <!-- Tabel Radar Lowongan -->
+        <div class="overflow-x-auto border border-slate-200/80 rounded-xl">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 text-slate-500 text-[11px] font-semibold uppercase tracking-wider border-b border-slate-200">
+                <th class="py-3 px-4">Posisi & Perusahaan</th>
+                <th class="py-3 px-4">Kategori</th>
+                <th class="py-3 px-4">Lokasi & Mode</th>
+                <th class="py-3 px-4">Sumber</th>
+                <th class="py-3 px-4 text-right">Tindakan</th>
+              </tr>
+            </thead>
+            <tbody id="radarTableBody" class="divide-y divide-slate-100 text-sm bg-white"></tbody>
+          </table>
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <input type="text" id="searchInput" onkeyup="applyFilters()" placeholder="Cari posisi, perusahaan, atau kota..."
-               class="md:col-span-2 border border-slate-300 rounded-lg px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" />
-        
-        <select id="modeFilter" onchange="applyFilters()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
-          <option value="">Semua Sistem Kerja</option>
-          <option value="Onsite">Onsite</option>
-          <option value="Hybrid">Hybrid</option>
-          <option value="Remote">Remote</option>
-        </select>
+      <!-- ===================================================================== -->
+      <!-- VIEW 2: LAMARAN SAYA (TRACKER & CATATAN PERMANEN)                     -->
+      <!-- ===================================================================== -->
+      <div id="viewApplied" class="hidden p-4 sm:p-6 space-y-4">
+        <!-- Pipeline Stage Pills -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap gap-1.5" id="stageFilterTabs">
+            <button onclick="setStageFilter('')" class="stage-btn bg-indigo-600 text-white text-xs font-medium px-3 py-1.5 rounded-lg" data-val="">Semua Lamaran</button>
+            <button onclick="setStageFilter('Applied')" class="stage-btn bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-medium px-3 py-1.5 rounded-lg" data-val="Applied">Applied</button>
+            <button onclick="setStageFilter('Online Test')" class="stage-btn bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-medium px-3 py-1.5 rounded-lg" data-val="Online Test">Online Test</button>
+            <button onclick="setStageFilter('HR Interview')" class="stage-btn bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-medium px-3 py-1.5 rounded-lg" data-val="HR Interview">HR Interview</button>
+            <button onclick="setStageFilter('User Interview')" class="stage-btn bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-medium px-3 py-1.5 rounded-lg" data-val="User Interview">User Interview</button>
+            <button onclick="setStageFilter('Offer')" class="stage-btn bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-medium px-3 py-1.5 rounded-lg" data-val="Offer">Offer 🎉</button>
+            <button onclick="setStageFilter('Rejected')" class="stage-btn bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-medium px-3 py-1.5 rounded-lg" data-val="Rejected">Rejected</button>
+          </div>
+          <span id="appliedCountLabel" class="text-xs text-slate-400">0 lamaran</span>
+        </div>
 
-        <select id="statusFilter" onchange="applyFilters()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white">
-          <option value="">Semua Status Lamaran</option>
-          <option value="Wishlist">Wishlist (Belum Dilamar)</option>
-          <option value="Applied">Applied</option>
-          <option value="Online Test">Online Test</option>
-          <option value="HR Interview">HR Interview</option>
-          <option value="User Interview">User Interview</option>
-          <option value="Offer">Offer</option>
-          <option value="Rejected">Rejected</option>
-        </select>
-      </div>
-    </section>
+        <!-- Pencarian Lamaran -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <input type="text" id="appliedSearch" onkeyup="renderAppliedTable()" placeholder="Cari perusahaan, posisi, versi CV, atau catatan..."
+                 class="sm:col-span-2 border border-slate-200 bg-slate-50/60 focus:bg-white rounded-xl px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500" />
+          <select id="appliedCluster" onchange="renderAppliedTable()" class="border border-slate-200 bg-slate-50/60 rounded-xl px-3 py-2 text-sm text-slate-700">
+            <option value="">Semua Klaster Posisi</option>
+            <option value="IT/Tech">IT/Tech</option>
+            <option value="Data/Digital">Data/Digital</option>
+            <option value="MT/ODP">MT / ODP / FG</option>
+            <option value="Operations">Operations</option>
+            <option value="Other">Umum / Lainnya</option>
+          </select>
+        </div>
 
-    <!-- Tabel Daftar Lowongan -->
-    <section class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-      <div class="px-4 py-3 border-b border-slate-100 flex justify-between items-center text-xs text-slate-500">
-        <span id="tableCount">Memuat data dari Supabase...</span>
-        <span>Diurutkan dari terbaru</span>
+        <!-- Tabel Lamaran Saya -->
+        <div class="overflow-x-auto border border-slate-200/80 rounded-xl">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-slate-50 text-slate-500 text-[11px] font-semibold uppercase tracking-wider border-b border-slate-200">
+                <th class="py-3 px-4">Posisi & Perusahaan</th>
+                <th class="py-3 px-4">Status & Tgl Lamar</th>
+                <th class="py-3 px-4">Versi CV</th>
+                <th class="py-3 px-4">Jadwal & Catatan</th>
+                <th class="py-3 px-4 text-right">Kelola</th>
+              </tr>
+            </thead>
+            <tbody id="appliedTableBody" class="divide-y divide-slate-100 text-sm bg-white"></tbody>
+          </table>
+        </div>
       </div>
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-            <tr class="bg-slate-50 text-slate-600 text-xs uppercase border-b border-slate-200">
-              <th class="py-3 px-4">Posisi & Perusahaan</th>
-              <th class="py-3 px-4">Klaster</th>
-              <th class="py-3 px-4">Lokasi & Mode</th>
-              <th class="py-3 px-4">Status Lamaran</th>
-              <th class="py-3 px-4">Jadwal & Catatan</th>
-              <th class="py-3 px-4 text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="jobsTableBody" class="divide-y divide-slate-100 text-sm"></tbody>
-        </table>
-      </div>
-    </section>
+    </div>
 
   </main>
 
-  <!-- MODAL 1: Tambah Lowongan Manual -->
-  <div id="addModal" class="hidden fixed inset-0 bg-slate-900/50 z-30 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-xl">
-      <div class="flex justify-between items-center border-b pb-2">
-        <h3 class="font-bold text-slate-900">Tambah Lowongan Manual</h3>
-        <button onclick="closeAddModal()" class="text-slate-400 hover:text-slate-700 text-xl">&times;</button>
+  <!-- ======================================================================= -->
+  <!-- MODAL 1: TAMBAH LOWONGAN / LAMARAN MANUAL                               -->
+  <!-- ======================================================================= -->
+  <div id="addModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-30 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl border border-slate-100 max-h-[92vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-bold text-slate-900 text-base">Catat Lowongan / Lamaran Baru</h3>
+          <p class="text-xs text-slate-500">Simpan langsung ke daftar Lamaran Saya atau Radar Lowongan</p>
+        </div>
+        <button onclick="closeAddModal()" class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
       </div>
+
       <div class="space-y-3 text-sm">
         <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1">Judul Posisi *</label>
-          <input type="text" id="inTitle" placeholder="Contoh: Management Trainee / Data Analyst" class="w-full border rounded-lg px-3 py-2" />
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Tujuan Penyimpanan</label>
+          <select id="inInitialStatus" onchange="toggleManualAppFields()" class="w-full border border-indigo-200 bg-indigo-50/50 text-indigo-900 font-medium rounded-xl px-3 py-2">
+            <option value="Applied">Langsung ke "Lamaran Saya" (Status: Applied)</option>
+            <option value="Online Test">Langsung ke "Lamaran Saya" (Status: Online Test)</option>
+            <option value="HR Interview">Langsung ke "Lamaran Saya" (Status: HR Interview)</option>
+            <option value="Wishlist">Simpan ke "Radar Lowongan" (Belum Dilamar)</option>
+          </select>
         </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1">Perusahaan *</label>
-          <input type="text" id="inCompany" placeholder="Contoh: Bank Mandiri / Paragon" class="w-full border rounded-lg px-3 py-2" />
-        </div>
-        <div class="grid grid-cols-2 gap-2">
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-medium text-slate-600 mb-1">Klaster</label>
-            <select id="inCluster" class="w-full border rounded-lg px-3 py-2 bg-white">
+            <label class="block text-xs font-medium text-slate-600 mb-1">Judul Posisi *</label>
+            <input type="text" id="inTitle" placeholder="Contoh: Management Trainee" class="w-full border border-slate-200 rounded-xl px-3 py-2" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Perusahaan *</label>
+            <input type="text" id="inCompany" placeholder="Contoh: Bank BCA / Paragon" class="w-full border border-slate-200 rounded-xl px-3 py-2" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Klaster Posisi</label>
+            <select id="inCluster" class="w-full border border-slate-200 rounded-xl px-3 py-2 bg-white">
               <option value="IT/Tech">IT/Tech</option>
               <option value="Data/Digital">Data/Digital</option>
-              <option value="MT/ODP">MT/ODP</option>
+              <option value="MT/ODP">MT / ODP / FG</option>
               <option value="Operations">Operations</option>
+              <option value="Other">Umum / Lainnya</option>
             </select>
           </div>
           <div>
             <label class="block text-xs font-medium text-slate-600 mb-1">Sistem Kerja</label>
-            <select id="inMode" class="w-full border rounded-lg px-3 py-2 bg-white">
+            <select id="inMode" class="w-full border border-slate-200 rounded-xl px-3 py-2 bg-white">
               <option value="Onsite">Onsite</option>
               <option value="Hybrid">Hybrid</option>
               <option value="Remote">Remote</option>
             </select>
           </div>
         </div>
-        <div class="grid grid-cols-2 gap-2">
+
+        <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-medium text-slate-600 mb-1">Lokasi</label>
-            <input type="text" id="inLocation" placeholder="Malang / Jakarta" class="w-full border rounded-lg px-3 py-2" />
+            <input type="text" id="inLocation" placeholder="Malang / Jakarta" class="w-full border border-slate-200 rounded-xl px-3 py-2" />
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-600 mb-1">Sumber Portal</label>
-            <input type="text" id="inSource" placeholder="JobStreet / Kalibrr / Web" class="w-full border rounded-lg px-3 py-2" />
+            <label class="block text-xs font-medium text-slate-600 mb-1">Sumber Info</label>
+            <input type="text" id="inSource" placeholder="JobStreet / Web Karir / IG" class="w-full border border-slate-200 rounded-xl px-3 py-2" />
           </div>
         </div>
+
         <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1">Link Lowongan *</label>
-          <input type="url" id="inUrl" placeholder="https://..." class="w-full border rounded-lg px-3 py-2" />
+          <label class="block text-xs font-medium text-slate-600 mb-1">Link Lowongan / Portal Karir *</label>
+          <input type="url" id="inUrl" placeholder="https://..." class="w-full border border-slate-200 rounded-xl px-3 py-2" />
+        </div>
+
+        <!-- Field Tambahan Khusus Jika Langsung Dilamar -->
+        <div id="manualAppFields" class="space-y-3 pt-2 border-t border-slate-100">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Tanggal Lamar</label>
+              <input type="date" id="inAppliedDate" class="w-full border border-slate-200 rounded-xl px-3 py-2" />
+            </div>
+            <div>
+              <label class="block text-xs font-medium text-slate-600 mb-1">Versi CV</label>
+              <input type="text" id="inCvVersion" placeholder="CV_Umum_v1.pdf" class="w-full border border-slate-200 rounded-xl px-3 py-2" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Catatan Awal</label>
+            <textarea id="inNotes" rows="2" placeholder="Email HRD, akun portal yang dipakai, dll..." class="w-full border border-slate-200 rounded-xl px-3 py-2"></textarea>
+          </div>
         </div>
       </div>
+
       <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeAddModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Batal</button>
-        <button id="btnSaveManual" onclick="saveManualJob()" class="px-4 py-2 text-xs font-medium bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Simpan ke Database</button>
+        <button onclick="closeAddModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Batal</button>
+        <button id="btnSaveManual" onclick="saveManualJob()" class="px-4 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs">Simpan Data</button>
       </div>
     </div>
   </div>
 
-  <!-- MODAL 2: Kelola Progres Lamaran -->
-  <div id="trackModal" class="hidden fixed inset-0 bg-slate-900/50 z-30 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-xl">
-      <div class="flex justify-between items-center border-b pb-2">
-        <h3 class="font-bold text-slate-900">Kelola Progres Lamaran</h3>
-        <button onclick="closeTrackModal()" class="text-slate-400 hover:text-slate-700 text-xl">&times;</button>
+  <!-- ======================================================================= -->
+  <!-- MODAL 2: EDIT PROGRES & CATATAN LAMARAN                                 -->
+  <!-- ======================================================================= -->
+  <div id="trackModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-30 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl border border-slate-100 max-h-[92vh] overflow-y-auto">
+      <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+        <div>
+          <h3 class="font-bold text-slate-900 text-base">Edit Detail & Progres Lamaran</h3>
+          <p id="trackJobHeader" class="text-xs font-medium text-indigo-600 mt-0.5"></p>
+        </div>
+        <button onclick="closeTrackModal()" class="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
       </div>
+
       <input type="hidden" id="trackJobId" />
-      <p id="trackJobHeader" class="text-xs font-semibold text-indigo-600"></p>
+
       <div class="space-y-3 text-sm">
-        <div class="grid grid-cols-2 gap-2">
+        <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-medium text-slate-600 mb-1">Status Tahapan</label>
-            <select id="trackStatus" class="w-full border rounded-lg px-3 py-2 bg-white">
-              <option value="Wishlist">Wishlist</option>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Tahapan Seleksi</label>
+            <select id="trackStatus" class="w-full border border-slate-200 rounded-xl px-3 py-2 bg-white font-medium">
               <option value="Applied">Applied</option>
               <option value="Online Test">Online Test</option>
               <option value="HR Interview">HR Interview</option>
               <option value="User Interview">User Interview</option>
-              <option value="Offer">Offer</option>
+              <option value="Offer">Offer 🎉</option>
               <option value="Rejected">Rejected</option>
+              <option value="Wishlist">Kembalikan ke Radar (Wishlist)</option>
             </select>
           </div>
           <div>
-            <label class="block text-xs font-medium text-slate-600 mb-1">Tanggal Lamar</label>
-            <input type="date" id="trackAppliedDate" class="w-full border rounded-lg px-3 py-2" />
+            <label class="block text-xs font-medium text-slate-600 mb-1">Tanggal Melamar</label>
+            <input type="date" id="trackAppliedDate" class="w-full border border-slate-200 rounded-xl px-3 py-2" />
           </div>
         </div>
-        <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1">Versi CV / Portofolio yang Dikirim</label>
-          <input type="text" id="trackCvVersion" placeholder="Contoh: CV_ATS_Data_v2.pdf" class="w-full border rounded-lg px-3 py-2" />
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Edit Posisi (Opsional)</label>
+            <input type="text" id="trackEditTitle" class="w-full border border-slate-200 rounded-xl px-3 py-2" />
+          </div>
+          <div>
+            <label class="block text-xs font-medium text-slate-600 mb-1">Edit Perusahaan (Opsional)</label>
+            <input type="text" id="trackEditCompany" class="w-full border border-slate-200 rounded-xl px-3 py-2" />
+          </div>
         </div>
+
+        <div>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Versi CV / Portofolio yang Digunakan</label>
+          <input type="text" id="trackCvVersion" placeholder="Contoh: CV_ATS_Data_v2.pdf" class="w-full border border-slate-200 rounded-xl px-3 py-2" />
+        </div>
+
         <div>
           <label class="block text-xs font-medium text-slate-600 mb-1">Jadwal Tes / Wawancara Berikutnya</label>
-          <input type="datetime-local" id="trackSchedule" class="w-full border rounded-lg px-3 py-2" />
+          <input type="datetime-local" id="trackSchedule" class="w-full border border-slate-200 rounded-xl px-3 py-2" />
         </div>
+
         <div>
-          <label class="block text-xs font-medium text-slate-600 mb-1">Catatan (Link Meeting, Kontak HR, Hasil)</label>
-          <textarea id="trackNotes" rows="3" class="w-full border rounded-lg px-3 py-2" placeholder="Catatan tahapan seleksi..."></textarea>
+          <label class="block text-xs font-medium text-slate-600 mb-1">Catatan Lengkap (Link Zoom, Kontak HR, Pertanyaan, Gaji)</label>
+          <textarea id="trackNotes" rows="3" class="w-full border border-slate-200 rounded-xl px-3 py-2" placeholder="Tulis catatan proses seleksi Anda di sini..."></textarea>
         </div>
       </div>
-      <div class="flex justify-between items-center pt-2">
-        <a id="btnAddGCal" href="#" target="_blank" class="hidden text-xs font-medium text-amber-700 hover:underline">
-          📅 Simpan ke Google Calendar &rarr;
+
+      <div class="flex flex-wrap justify-between items-center gap-2 pt-2 border-t border-slate-100">
+        <a id="btnAddGCal" href="#" target="_blank" class="hidden inline-flex items-center gap-1 text-xs font-semibold text-amber-700 bg-amber-50 hover:bg-amber-100 px-3 py-2 rounded-xl transition">
+          <span>📅 Simpan ke Google Calendar</span>
         </a>
         <div class="flex gap-2 ml-auto">
-          <button onclick="closeTrackModal()" class="px-4 py-2 text-xs font-medium text-slate-600 hover:bg-slate-100 rounded-lg">Batal</button>
-          <button id="btnSaveProgress" onclick="saveProgress()" class="px-4 py-2 text-xs font-medium bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">Simpan Progres</button>
+          <button onclick="closeTrackModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl">Batal</button>
+          <button id="btnSaveProgress" onclick="saveProgress()" class="px-4 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-xs">Simpan Perubahan</button>
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div id="toast" class="hidden fixed bottom-5 right-5 z-40 bg-slate-900 text-white text-xs font-medium px-4 py-3 rounded-xl shadow-lg flex items-center gap-2.5 transition-all">
+    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+    <span id="toastMsg">Tersimpan</span>
   </div>
 
   <script>
@@ -251,27 +409,37 @@
     // KONFIGURASI SUPABASE (Ganti Publishable Key dengan milik Anda)
     // =========================================================================
     const SUPABASE_URL = "https://zhvgxprefzfnrfzdwybj.supabase.co";
-    const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_TX_8nFm72DZUWyOGqpGNZg_zGr4aO79";
+    const SUPABASE_PUBLISHABLE_KEY = "TEMPEL_PUBLISHABLE_KEY_ANDA_DI_SINI";
 
     let sb = null;
     let allRecords = [];
-    let selectedCluster = "";
+    let activeMainTab = "radar";
+    let radarClusterFilter = "";
+    let stageFilter = "";
     let clusterChartInstance = null;
 
     window.onload = function () {
+      document.getElementById("inAppliedDate").value = new Date().toISOString().split("T")[0];
+
       if (!SUPABASE_PUBLISHABLE_KEY || SUPABASE_PUBLISHABLE_KEY.includes("TEMPEL_")) {
         document.getElementById("configAlert").classList.remove("hidden");
-        document.getElementById("tableCount").innerText = "Menunggu konfigurasi Publishable Key...";
+        document.getElementById("radarCountLabel").innerText = "Menunggu Publishable Key...";
         return;
       }
       sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
       fetchAllData();
     };
 
+    function showToast(msg) {
+      const el = document.getElementById("toast");
+      document.getElementById("toastMsg").innerText = msg;
+      el.classList.remove("hidden");
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => el.classList.add("hidden"), 3500);
+    }
+
     async function fetchAllData() {
       if (!sb) return;
-      document.getElementById("tableCount").innerText = "Mengambil data dari PostgreSQL...";
-
       const { data, error } = await sb
         .from("job_listings")
         .select(`
@@ -283,7 +451,7 @@
         .order("created_at", { ascending: false });
 
       if (error) {
-        alert("Gagal mengambil data: " + error.message);
+        alert("Gagal memuat data: " + error.message);
         return;
       }
 
@@ -295,33 +463,77 @@
           cv_version: app?.cv_version || "",
           applied_date: app?.applied_date || "",
           next_schedule: app?.next_schedule || "",
-          notes: app?.notes || ""
+          notes: app?.notes || "",
+          app_updated_at: app?.updated_at || row.created_at
         };
       });
 
-      updateDashboardMetrics(allRecords);
-      renderClusterChart(allRecords);
-      applyFilters();
+      updateKPIs();
+      renderRadarTable();
+      renderAppliedTable();
+      if (!document.getElementById("chartPanel").classList.contains("hidden")) {
+        renderClusterChart();
+      }
     }
 
-    function updateDashboardMetrics(records) {
-      const total = records.length;
-      const appliedList = ["Applied", "Online Test", "HR Interview", "User Interview", "Offer", "Rejected"];
-      const progressList = ["Online Test", "HR Interview", "User Interview", "Offer"];
+    function isAppliedRecord(r) {
+      return r.app_status && r.app_status !== "Wishlist";
+    }
 
-      const appliedCount = records.filter(r => appliedList.includes(r.app_status)).length;
-      const progressCount = records.filter(r => progressList.includes(r.app_status)).length;
-      const rate = appliedCount > 0 ? Math.round((progressCount / appliedCount) * 100) : 0;
+    function updateKPIs() {
+      const radarList = allRecords.filter(r => !isAppliedRecord(r));
+      const appliedList = allRecords.filter(r => isAppliedRecord(r));
+      const progressStages = ["Online Test", "HR Interview", "User Interview", "Offer"];
+      const progressList = appliedList.filter(r => progressStages.includes(r.app_status));
+      const rate = appliedList.length > 0 ? Math.round((progressList.length / appliedList.length) * 100) : 0;
 
-      document.getElementById("kpiTotal").innerText = total;
-      document.getElementById("kpiApplied").innerText = appliedCount;
-      document.getElementById("kpiProgress").innerText = progressCount;
+      document.getElementById("kpiRadar").innerText = radarList.length;
+      document.getElementById("kpiApplied").innerText = appliedList.length;
+      document.getElementById("kpiProgress").innerText = progressList.length;
       document.getElementById("kpiRate").innerText = rate + "%";
+
+      document.getElementById("badgeRadar").innerText = radarList.length;
+      document.getElementById("badgeApplied").innerText = appliedList.length;
     }
 
-    function renderClusterChart(records) {
-      const clusters = ["IT/Tech", "Data/Digital", "MT/ODP", "Operations"];
-      const counts = clusters.map(c => records.filter(r => r.role_cluster === c).length);
+    // Navigasi Tab Utama
+    function switchMainTab(tab) {
+      activeMainTab = tab;
+      const btnRadar = document.getElementById("tabBtnRadar");
+      const btnApplied = document.getElementById("tabBtnApplied");
+      const viewRadar = document.getElementById("viewRadar");
+      const viewApplied = document.getElementById("viewApplied");
+
+      if (tab === "radar") {
+        btnRadar.className = "tab-active py-4 px-1 text-sm flex items-center gap-2 transition";
+        btnApplied.className = "tab-inactive py-4 px-1 text-sm flex items-center gap-2 transition";
+        viewRadar.classList.remove("hidden");
+        viewApplied.classList.add("hidden");
+      } else {
+        btnApplied.className = "tab-active py-4 px-1 text-sm flex items-center gap-2 transition";
+        btnRadar.className = "tab-inactive py-4 px-1 text-sm flex items-center gap-2 transition";
+        viewApplied.classList.remove("hidden");
+        viewRadar.classList.add("hidden");
+      }
+    }
+
+    function toggleChartPanel() {
+      const panel = document.getElementById("chartPanel");
+      const txt = document.getElementById("chartToggleText");
+      panel.classList.toggle("hidden");
+      if (!panel.classList.contains("hidden")) {
+        txt.innerText = "Sembunyikan Grafik";
+        renderClusterChart();
+      } else {
+        txt.innerText = "Tampilkan Grafik Distribusi";
+      }
+    }
+
+    function renderClusterChart() {
+      const clusters = ["IT/Tech", "Data/Digital", "MT/ODP", "Operations", "Other"];
+      const labels = ["IT/Tech", "Data/Digital", "MT/ODP/FG", "Operations", "Umum"];
+      const radarCounts = clusters.map(c => allRecords.filter(r => !isAppliedRecord(r) && r.role_cluster === c).length);
+      const appliedCounts = clusters.map(c => allRecords.filter(r => isAppliedRecord(r) && r.role_cluster === c).length);
 
       const ctx = document.getElementById("clusterChart").getContext("2d");
       if (clusterChartInstance) clusterChartInstance.destroy();
@@ -329,111 +541,231 @@
       clusterChartInstance = new Chart(ctx, {
         type: "bar",
         data: {
-          labels: clusters,
-          datasets: [{
-            data: counts,
-            backgroundColor: ["#4f46e5", "#0ea5e9", "#10b981", "#f59e0b"],
-            borderRadius: 6
-          }]
+          labels,
+          datasets: [
+            { label: "Radar Lowongan", data: radarCounts, backgroundColor: "#cbd5e1", borderRadius: 6 },
+            { label: "Lamaran Saya", data: appliedCounts, backgroundColor: "#4f46e5", borderRadius: 6 }
+          ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } } },
-            x: { ticks: { font: { size: 10 } } }
-          }
+          plugins: { legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 11 } } } },
+          scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
         }
       });
     }
 
-    function setCluster(val) {
-      selectedCluster = val;
-      document.querySelectorAll(".cluster-btn").forEach(btn => {
+    // =========================================================================
+    // LOGIKA VIEW 1: RADAR LOWONGAN BARU
+    // =========================================================================
+    function setRadarCluster(val) {
+      radarClusterFilter = val;
+      document.querySelectorAll(".r-cluster-btn").forEach(btn => {
         btn.className = btn.getAttribute("data-val") === val
-          ? "cluster-btn bg-slate-900 text-white text-xs font-medium px-3.5 py-1.5 rounded-full"
-          : "cluster-btn bg-slate-100 text-slate-700 hover:bg-slate-200 text-xs font-medium px-3.5 py-1.5 rounded-full";
+          ? "r-cluster-btn bg-slate-900 text-white text-xs font-medium px-3 py-1.5 rounded-lg"
+          : "r-cluster-btn bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-medium px-3 py-1.5 rounded-lg";
       });
-      applyFilters();
+      renderRadarTable();
     }
 
-    function applyFilters() {
-      const kw = document.getElementById("searchInput").value.toLowerCase();
-      const mode = document.getElementById("modeFilter").value;
-      const status = document.getElementById("statusFilter").value;
+    function renderRadarTable() {
+      const kw = document.getElementById("radarSearch").value.toLowerCase();
+      const mode = document.getElementById("radarMode").value;
+      const source = document.getElementById("radarSource").value;
 
       const filtered = allRecords.filter(r => {
-        const matchCluster = selectedCluster === "" || r.role_cluster === selectedCluster;
+        if (isAppliedRecord(r)) return false;
+        const matchCluster = radarClusterFilter === "" || r.role_cluster === radarClusterFilter;
         const matchMode = mode === "" || r.work_mode === mode;
-        const matchStatus = status === "" || r.app_status === status;
+        const matchSource = source === "" || (r.source || "").toLowerCase().includes(source.toLowerCase());
         const matchText =
           r.title.toLowerCase().includes(kw) ||
           r.company.toLowerCase().includes(kw) ||
           (r.location || "").toLowerCase().includes(kw);
-        return matchCluster && matchMode && matchStatus && matchText;
+        return matchCluster && matchMode && matchSource && matchText;
       });
 
-      renderTable(filtered);
-    }
+      document.getElementById("radarCountLabel").innerText = `Menampilkan ${filtered.length} lowongan baru`;
+      const tbody = document.getElementById("radarTableBody");
 
-    function renderTable(rows) {
-      const tbody = document.getElementById("jobsTableBody");
-      document.getElementById("tableCount").innerText = `Menampilkan ${rows.length} lowongan`;
-
-      if (rows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="py-10 text-center text-slate-400 text-xs">Tidak ada lowongan yang sesuai filter.</td></tr>`;
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center text-slate-400 text-xs">Tidak ada lowongan baru yang cocok dengan filter saat ini.</td></tr>`;
         return;
       }
 
-      const statusStyles = {
-        "Wishlist": "bg-slate-100 text-slate-700",
-        "Applied": "bg-blue-50 text-blue-700",
-        "Online Test": "bg-purple-50 text-purple-700",
-        "HR Interview": "bg-amber-50 text-amber-700",
-        "User Interview": "bg-orange-50 text-orange-700",
-        "Offer": "bg-emerald-50 text-emerald-700",
-        "Rejected": "bg-rose-50 text-rose-700"
+      tbody.innerHTML = filtered.map(r => `
+        <tr class="hover:bg-slate-50/80 transition group">
+          <td class="py-3.5 px-4">
+            <div class="font-semibold text-slate-900">${esc(r.title)}</div>
+            <div class="text-xs text-slate-500 mt-0.5">${esc(r.company)}</div>
+          </td>
+          <td class="py-3.5 px-4">
+            <span class="text-[11px] font-semibold px-2.5 py-1 rounded-md bg-slate-100 text-slate-700">${esc(r.role_cluster)}</span>
+          </td>
+          <td class="py-3.5 px-4 text-xs">
+            <div class="text-slate-700 font-medium">${esc(r.location || "Indonesia")}</div>
+            <div class="text-slate-400">${esc(r.work_mode)}</div>
+          </td>
+          <td class="py-3.5 px-4">
+            <span class="text-xs text-slate-500 bg-slate-50 border border-slate-200/80 px-2 py-0.5 rounded-md">${esc(r.source)}</span>
+          </td>
+          <td class="py-3.5 px-4 text-right whitespace-nowrap space-x-1.5">
+            <a href="${esc(r.job_url)}" target="_blank" rel="noopener noreferrer"
+               class="inline-flex items-center text-xs font-medium px-3 py-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-100 transition">
+              Lihat
+            </a>
+            <button onclick="applyAndMove('${r.id}')"
+                    class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition">
+              <span>Lamar & Pindahkan</span>
+              <span>&rarr;</span>
+            </button>
+            <button onclick="deleteJob('${r.id}')" title="Hapus dari Radar"
+                    class="inline-flex items-center text-xs p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition">
+              &times;
+            </button>
+          </td>
+        </tr>
+      `).join("");
+    }
+
+    // Klik "Lamar & Pindahkan": Buka Link + Simpan Status 'Applied' + Pindah Tab
+    async function applyAndMove(jobId) {
+      const rec = allRecords.find(r => r.id === jobId);
+      if (!rec) return;
+
+      // Buka portal lowongan di tab baru
+      window.open(rec.job_url, "_blank", "noopener,noreferrer");
+
+      const today = new Date().toISOString().split("T")[0];
+      const { error } = await sb.from("applications").upsert({
+        job_id: jobId,
+        status: "Applied",
+        applied_date: today,
+        updated_at: new Date().toISOString()
+      }, { onConflict: "job_id" });
+
+      if (error) {
+        alert("Gagal memindahkan lamaran: " + error.message);
+        return;
+      }
+
+      showToast(`"${rec.title}" dipindahkan ke Lamaran Saya!`);
+      await fetchAllData();
+    }
+
+    // =========================================================================
+    // LOGIKA VIEW 2: LAMARAN SAYA (TRACKER & CATATAN)
+    // =========================================================================
+    function setStageFilter(val) {
+      stageFilter = val;
+      document.querySelectorAll(".stage-btn").forEach(btn => {
+        btn.className = btn.getAttribute("data-val") === val
+          ? "stage-btn bg-indigo-600 text-white text-xs font-medium px-3 py-1.5 rounded-lg"
+          : "stage-btn bg-slate-100 text-slate-600 hover:bg-slate-200 text-xs font-medium px-3 py-1.5 rounded-lg";
+      });
+      renderAppliedTable();
+    }
+
+    function renderAppliedTable() {
+      const kw = document.getElementById("appliedSearch").value.toLowerCase();
+      const cluster = document.getElementById("appliedCluster").value;
+
+      const filtered = allRecords.filter(r => {
+        if (!isAppliedRecord(r)) return false;
+        const matchStage = stageFilter === "" || r.app_status === stageFilter;
+        const matchCluster = cluster === "" || r.role_cluster === cluster;
+        const matchText =
+          r.title.toLowerCase().includes(kw) ||
+          r.company.toLowerCase().includes(kw) ||
+          (r.cv_version || "").toLowerCase().includes(kw) ||
+          (r.notes || "").toLowerCase().includes(kw);
+        return matchStage && matchCluster && matchText;
+      });
+
+      document.getElementById("appliedCountLabel").innerText = `${filtered.length} lamaran tercatat`;
+      const tbody = document.getElementById("appliedTableBody");
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="py-12 text-center text-slate-400 text-xs">Belum ada lamaran pada filter ini. Klik "Lamar & Pindahkan" di Radar Lowongan atau "+ Catat Lowongan / Lamaran".</td></tr>`;
+        return;
+      }
+
+      const badgeMap = {
+        "Applied": "bg-blue-50 text-blue-700 border-blue-200/70",
+        "Online Test": "bg-purple-50 text-purple-700 border-purple-200/70",
+        "HR Interview": "bg-amber-50 text-amber-700 border-amber-200/70",
+        "User Interview": "bg-orange-50 text-orange-700 border-orange-200/70",
+        "Offer": "bg-emerald-50 text-emerald-700 border-emerald-200/70",
+        "Rejected": "bg-rose-50 text-rose-700 border-rose-200/70"
       };
 
-      tbody.innerHTML = rows.map(r => {
-        const scheduleFormatted = r.next_schedule
+      tbody.innerHTML = filtered.map(r => {
+        const schText = r.next_schedule
           ? new Date(r.next_schedule).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })
           : "";
 
         return `
-          <tr class="hover:bg-slate-50/90 transition">
+          <tr class="hover:bg-slate-50/80 transition">
             <td class="py-3.5 px-4">
-              <div class="font-semibold text-slate-900">${esc(r.title)}</div>
-              <div class="text-xs text-slate-500">${esc(r.company)} • <span class="text-[11px] text-slate-400">${esc(r.source)}</span></div>
+              <div class="flex items-center gap-1.5">
+                <span class="font-semibold text-slate-900">${esc(r.title)}</span>
+                <a href="${esc(r.job_url)}" target="_blank" rel="noopener noreferrer" title="Buka Link Lowongan" class="text-slate-400 hover:text-indigo-600 text-xs">↗</a>
+              </div>
+              <div class="text-xs text-slate-500 mt-0.5">${esc(r.company)} • <span class="text-slate-400">${esc(r.role_cluster)} (${esc(r.work_mode)})</span></div>
             </td>
             <td class="py-3.5 px-4">
-              <span class="text-xs font-medium px-2.5 py-0.5 rounded bg-indigo-50 text-indigo-700">${esc(r.role_cluster)}</span>
+              <span class="inline-block text-xs font-semibold px-2.5 py-1 rounded-full border ${badgeMap[r.app_status] || 'bg-slate-100 text-slate-700'}">
+                ${esc(r.app_status)}
+              </span>
+              <div class="text-[11px] text-slate-400 mt-1">Tgl: ${esc(r.applied_date || "-")}</div>
             </td>
             <td class="py-3.5 px-4 text-xs">
-              <div class="text-slate-700">${esc(r.location || "-")}</div>
-              <div class="text-slate-400">${esc(r.work_mode)}</div>
+              ${r.cv_version
+                ? `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-slate-100 text-slate-700 font-medium">📄 ${esc(r.cv_version)}</span>`
+                : `<span class="text-slate-400 italic">Belum dicatat</span>`}
             </td>
-            <td class="py-3.5 px-4">
-              <span class="text-xs font-semibold px-2.5 py-1 rounded-full ${statusStyles[r.app_status] || 'bg-slate-100'}">${esc(r.app_status)}</span>
-              ${r.cv_version ? `<div class="text-[11px] text-slate-400 mt-1">📄 ${esc(r.cv_version)}</div>` : ""}
+            <td class="py-3.5 px-4 text-xs max-w-xs">
+              ${schText ? `<div class="font-semibold text-amber-700 mb-0.5">📅 ${esc(schText)}</div>` : ""}
+              <p class="text-slate-600 line-clamp-2">${esc(r.notes || "-")}</p>
             </td>
-            <td class="py-3.5 px-4 text-xs text-slate-600 max-w-xs">
-              ${scheduleFormatted ? `<div class="font-medium text-amber-700">📅 ${esc(scheduleFormatted)}</div>` : ""}
-              <div class="truncate">${esc(r.notes || "-")}</div>
-            </td>
-            <td class="py-3.5 px-4 text-right space-x-1 whitespace-nowrap">
-              <a href="${esc(r.job_url)}" target="_blank" rel="noopener noreferrer" class="inline-block text-xs px-2.5 py-1.5 border border-slate-300 rounded-lg hover:bg-slate-100">Buka</a>
-              <button onclick='openTrackModal(${JSON.stringify(r).replace(/'/g, "&#39;")})' class="text-xs px-2.5 py-1.5 bg-slate-900 text-white rounded-lg hover:bg-indigo-600">Kelola</button>
+            <td class="py-3.5 px-4 text-right whitespace-nowrap space-x-1">
+              <button onclick="openTrackModal('${r.id}')" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-indigo-600 text-white transition">
+                Edit & Catat
+              </button>
+              <button onclick="deleteJob('${r.id}')" title="Hapus Permanen" class="text-xs px-2 py-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition">
+                Hapus
+              </button>
             </td>
           </tr>
         `;
       }).join("");
     }
 
-    // Modal 1: Tambah Lowongan Manual
-    function openAddModal() { document.getElementById("addModal").classList.remove("hidden"); }
+    // =========================================================================
+    // MODAL 1: TAMBAH LOWONGAN / LAMARAN MANUAL
+    // =========================================================================
+    function openAddModal() {
+      document.getElementById("inTitle").value = "";
+      document.getElementById("inCompany").value = "";
+      document.getElementById("inLocation").value = "";
+      document.getElementById("inSource").value = "";
+      document.getElementById("inUrl").value = "";
+      document.getElementById("inCvVersion").value = "";
+      document.getElementById("inNotes").value = "";
+      document.getElementById("inInitialStatus").value = activeMainTab === "applied" ? "Applied" : "Wishlist";
+      toggleManualAppFields();
+      document.getElementById("addModal").classList.remove("hidden");
+    }
+
     function closeAddModal() { document.getElementById("addModal").classList.add("hidden"); }
+
+    function toggleManualAppFields() {
+      const st = document.getElementById("inInitialStatus").value;
+      const box = document.getElementById("manualAppFields");
+      if (st === "Wishlist") box.classList.add("hidden");
+      else box.classList.remove("hidden");
+    }
 
     async function sha256(str) {
       const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
@@ -444,13 +776,13 @@
       const title = document.getElementById("inTitle").value.trim();
       const company = document.getElementById("inCompany").value.trim();
       const job_url = document.getElementById("inUrl").value.trim();
-      if (!title || !company || !job_url) return alert("Judul posisi, perusahaan, dan link wajib diisi.");
+      if (!title || !company || !job_url) return alert("Judul posisi, nama perusahaan, dan link lowongan wajib diisi.");
 
       const btn = document.getElementById("btnSaveManual");
       btn.disabled = true;
 
-      const extHash = await sha256(`${company.toLowerCase()}_${title.toLowerCase()}`);
-      const { error } = await sb.from("job_listings").upsert({
+      const extHash = await sha256(`${company.toLowerCase()}_${title.toLowerCase()}_${Date.now()}`);
+      const { data: insertedJob, error } = await sb.from("job_listings").insert({
         external_hash: extHash,
         title,
         company,
@@ -459,20 +791,44 @@
         location: document.getElementById("inLocation").value.trim() || "Indonesia",
         source: document.getElementById("inSource").value.trim() || "Manual",
         job_url
-      }, { onConflict: "external_hash" });
+      }).select().single();
+
+      if (error) {
+        btn.disabled = false;
+        return alert("Gagal menyimpan lowongan: " + error.message);
+      }
+
+      const initialStatus = document.getElementById("inInitialStatus").value;
+      if (initialStatus !== "Wishlist" && insertedJob) {
+        await sb.from("applications").upsert({
+          job_id: insertedJob.id,
+          status: initialStatus,
+          applied_date: document.getElementById("inAppliedDate").value || null,
+          cv_version: document.getElementById("inCvVersion").value.trim() || null,
+          notes: document.getElementById("inNotes").value.trim() || null,
+          updated_at: new Date().toISOString()
+        }, { onConflict: "job_id" });
+      }
 
       btn.disabled = false;
-      if (error) return alert("Gagal menyimpan: " + error.message);
-
       closeAddModal();
+      showToast(initialStatus === "Wishlist" ? "Ditambahkan ke Radar Lowongan" : "Tersimpan di Lamaran Saya!");
+      if (initialStatus !== "Wishlist") switchMainTab("applied");
       fetchAllData();
     }
 
-    // Modal 2: Update Progres & Google Calendar Deep Link
-    function openTrackModal(rec) {
+    // =========================================================================
+    // MODAL 2: EDIT PROGRES & CATATAN LAMARAN
+    // =========================================================================
+    function openTrackModal(jobId) {
+      const rec = allRecords.find(r => r.id === jobId);
+      if (!rec) return;
+
       document.getElementById("trackJobId").value = rec.id;
       document.getElementById("trackJobHeader").innerText = `${rec.title} — ${rec.company}`;
-      document.getElementById("trackStatus").value = rec.app_status || "Wishlist";
+      document.getElementById("trackEditTitle").value = rec.title;
+      document.getElementById("trackEditCompany").value = rec.company;
+      document.getElementById("trackStatus").value = rec.app_status === "Wishlist" ? "Applied" : rec.app_status;
       document.getElementById("trackAppliedDate").value = rec.applied_date || new Date().toISOString().split("T")[0];
       document.getElementById("trackCvVersion").value = rec.cv_version || "";
       document.getElementById("trackNotes").value = rec.notes || "";
@@ -485,13 +841,13 @@
         document.getElementById("trackSchedule").value = "";
       }
 
-      updateCalendarLink(rec);
+      setupCalendarLink(rec);
       document.getElementById("trackModal").classList.remove("hidden");
     }
 
     function closeTrackModal() { document.getElementById("trackModal").classList.add("hidden"); }
 
-    function updateCalendarLink(rec) {
+    function setupCalendarLink(rec) {
       const linkEl = document.getElementById("btnAddGCal");
       const schInput = document.getElementById("trackSchedule");
 
@@ -504,7 +860,9 @@
         const end = new Date(start.getTime() + 60 * 60 * 1000);
         const fmt = d => d.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
         const status = document.getElementById("trackStatus").value;
-        const text = encodeURIComponent(`[CareerRadar] ${status}: ${rec.title} - ${rec.company}`);
+        const title = document.getElementById("trackEditTitle").value || rec.title;
+        const company = document.getElementById("trackEditCompany").value || rec.company;
+        const text = encodeURIComponent(`[CareerRadar] ${status}: ${title} - ${company}`);
         const details = encodeURIComponent(`Link Lowongan: ${rec.job_url}\nCatatan: ${document.getElementById("trackNotes").value}`);
         linkEl.href = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${fmt(start)}/${fmt(end)}&details=${details}`;
         linkEl.classList.remove("hidden");
@@ -516,6 +874,8 @@
 
     async function saveProgress() {
       const jobId = document.getElementById("trackJobId").value;
+      const newTitle = document.getElementById("trackEditTitle").value.trim();
+      const newCompany = document.getElementById("trackEditCompany").value.trim();
       const status = document.getElementById("trackStatus").value;
       const appliedDate = document.getElementById("trackAppliedDate").value;
       const cvVersion = document.getElementById("trackCvVersion").value.trim();
@@ -524,6 +884,10 @@
 
       const btn = document.getElementById("btnSaveProgress");
       btn.disabled = true;
+
+      if (newTitle && newCompany) {
+        await sb.from("job_listings").update({ title: newTitle, company: newCompany }).eq("id", jobId);
+      }
 
       const { error } = await sb.from("applications").upsert({
         job_id: jobId,
@@ -536,9 +900,18 @@
       }, { onConflict: "job_id" });
 
       btn.disabled = false;
-      if (error) return alert("Gagal memperbarui progres: " + error.message);
+      if (error) return alert("Gagal memperbarui data: " + error.message);
 
       closeTrackModal();
+      showToast("Perubahan lamaran berhasil disimpan!");
+      fetchAllData();
+    }
+
+    async function deleteJob(jobId) {
+      if (!confirm("Hapus data ini secara permanen?")) return;
+      const { error } = await sb.from("job_listings").delete().eq("id", jobId);
+      if (error) return alert("Gagal menghapus: " + error.message);
+      showToast("Data berhasil dihapus.");
       fetchAllData();
     }
 
