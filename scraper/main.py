@@ -1,6 +1,7 @@
 import os
 import re
 import hashlib
+from datetime import datetime, timedelta, timezone
 import pandas as pd
 import requests
 from jobspy import scrape_jobs
@@ -101,6 +102,24 @@ def detect_work_mode(location: str, is_remote: bool) -> str:
     if "hybrid" in loc:
         return "Hybrid"
     return "Onsite"
+
+def refresh_unapplied_radar(supabase: Client, max_age_hours: int = 48):
+    cutoff = (datetime.now(timezone.utc) - timedelta(hours=max_age_hours)).isoformat()
+
+    # Lindungi semua lowongan yang sudah dipindahkan ke "Lamaran Saya" (status != Wishlist)
+    applied_res = supabase.table("applications").select("job_id").neq("status", "Wishlist").execute()
+    protected_ids = {row["job_id"] for row in (applied_res.data or [])}
+
+    # Cari lowongan lama di Radar
+    old_jobs = supabase.table("job_listings").select("id").lt("created_at", cutoff).execute()
+    stale_ids = [row["id"] for row in (old_jobs.data or []) if row["id"] not in protected_ids]
+
+    # Hapus bertahap per 100 baris agar tetap stabil di API Supabase
+    if stale_ids:
+        for i in range(0, len(stale_ids), 100):
+            batch = stale_ids[i:i + 100]
+            supabase.table("job_listings").delete().in_("id", batch).execute()
+        print(f"Auto-refresh: {len(stale_ids)} lowongan lama (> {max_age_hours} jam) yang tidak dilamar telah dibersihkan.")
 
 def extract_jobs() -> pd.DataFrame:
     all_frames = []
@@ -210,6 +229,7 @@ def send_telegram_digest(new_jobs: list):
 
 if __name__ == "__main__":
     supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
+    refresh_unapplied_radar(supabase_client, max_age_hours=48)
     raw_df = extract_jobs()
     inserted_jobs = transform_and_load(raw_df, supabase_client)
     print(f"Selesai. {len(inserted_jobs)} lowongan baru disimpan ke Supabase.")
