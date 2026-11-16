@@ -2,7 +2,7 @@ import os
 import re
 import time
 import hashlib
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, date, timedelta, timezone
 import pandas as pd
 import requests
 from jobspy import scrape_jobs
@@ -19,7 +19,6 @@ HTTP_HEADERS = {
     "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7"
 }
 
-# 1. Rencana Pencarian LinkedIn & Indeed Indonesia (via JobSpy)
 JOBSPY_PLANS = [
     {
         "location": "Malang, East Java, Indonesia",
@@ -47,7 +46,6 @@ JOBSPY_PLANS = [
     }
 ]
 
-# 2. Rencana Pencarian JobStreet Indonesia (Direct API v5)
 JOBSTREET_PLANS = [
     {"keywords": "Graphic Designer", "where": "Malang", "tag_city": "Malang"},
     {"keywords": "Social Media", "where": "Malang", "tag_city": "Malang"},
@@ -58,7 +56,6 @@ JOBSTREET_PLANS = [
     {"keywords": "Social Media Specialist", "where": "Surabaya", "tag_city": "Surabaya"}
 ]
 
-# 3. Kata Kunci Pencarian Kalibrr Indonesia (Direct JSON Board API)
 KALIBRR_KEYWORDS = [
     "UI UX",
     "Graphic Design",
@@ -90,6 +87,40 @@ EXCLUDED_SENIORITY_PATTERNS = [
     r"\bmanajer\b", r"\bhead of\b", r"\bdirector\b", r"\bdirektur\b", r"\bvp\b",
     r"\bvice president\b", r"\bprincipal\b", r"\bsupervisor\b", r"\bspv\b", r"\bchief\b"
 ]
+
+def parse_iso_datetime(val) -> str | None:
+    """Mengonversi berbagai format tanggal/timestamp portal menjadi ISO 8601 UTC."""
+    if val is None or (isinstance(val, float) and pd.isna(val)):
+        return None
+    if isinstance(val, pd.Timestamp):
+        if pd.isna(val):
+            return None
+        dt = val.to_pydatetime()
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.isoformat()
+    if isinstance(val, datetime):
+        dt = val if val.tzinfo else val.replace(tzinfo=timezone.utc)
+        return dt.isoformat()
+    if isinstance(val, date):
+        return datetime(val.year, val.month, val.day, tzinfo=timezone.utc).isoformat()
+
+    s = str(val).strip()
+    if not s or s.lower() in ("nan", "nat", "none", "null"):
+        return None
+    try:
+        dt = datetime.fromisoformat(s.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.isoformat()
+    except Exception:
+        try:
+            parsed = pd.to_datetime(s, utc=True)
+            if pd.isna(parsed):
+                return None
+            return parsed.to_pydatetime().isoformat()
+        except Exception:
+            return None
 
 def is_excluded_role(title: str) -> bool:
     t = str(title).lower()
@@ -186,7 +217,6 @@ def fetch_jobstreet_jobs() -> list:
                 timeout=15
             )
             if resp.status_code != 200:
-                print(f"[JobStreet] HTTP {resp.status_code} untuk '{plan['keywords']}'")
                 continue
 
             items = resp.json().get("data", [])
@@ -207,6 +237,9 @@ def fetch_jobstreet_jobs() -> list:
                 is_rem = "remote" in arrangements
                 work_mode = detect_work_mode(f"{loc_label} {arrangements}", title, is_rem)
 
+                posted_iso = parse_iso_datetime(item.get("listingDate"))
+                closing_iso = parse_iso_datetime(item.get("expiryDate") or item.get("closingDate"))
+
                 if job_id and title:
                     results.append({
                         "title": title,
@@ -214,7 +247,9 @@ def fetch_jobstreet_jobs() -> list:
                         "location": loc_label,
                         "work_mode": work_mode,
                         "source": "JobStreet",
-                        "job_url": f"https://id.jobstreet.com/id/job/{job_id}"
+                        "job_url": f"https://id.jobstreet.com/id/job/{job_id}",
+                        "posted_at": posted_iso,
+                        "closing_at": closing_iso
                     })
             time.sleep(0.8)
         except Exception as e:
@@ -228,11 +263,7 @@ def fetch_kalibrr_jobs() -> list:
     results = []
     for kw in KALIBRR_KEYWORDS:
         try:
-            params = {
-                "text": kw,
-                "limit": 30,
-                "offset": 0
-            }
+            params = {"text": kw, "limit": 30, "offset": 0}
             resp = requests.get(
                 "https://www.kalibrr.com/kjs/job_board/search",
                 params=params,
@@ -240,7 +271,6 @@ def fetch_kalibrr_jobs() -> list:
                 timeout=15
             )
             if resp.status_code != 200:
-                print(f"[Kalibrr] HTTP {resp.status_code} untuk '{kw}'")
                 continue
 
             jobs = resp.json().get("jobs", [])
@@ -252,7 +282,6 @@ def fetch_kalibrr_jobs() -> list:
                 city = str(addr_comps.get("city") or addr_comps.get("region") or "").strip()
                 raw_loc_str = f"{city} {country}".lower()
 
-                # Filter hanya lowongan di Indonesia
                 if "indonesia" not in raw_loc_str and not any(c in raw_loc_str for c in ["jakarta", "malang", "surabaya", "bandung", "yogyakarta", "tangerang", "bekasi", "depok", "bogor", "semarang", "bali"]):
                     continue
 
@@ -267,6 +296,9 @@ def fetch_kalibrr_jobs() -> list:
                 loc_display = f"{city}, Indonesia" if city else "Indonesia"
                 work_mode = detect_work_mode(loc_display, title, is_wfh)
 
+                posted_iso = parse_iso_datetime(j.get("activation_date") or j.get("created_at"))
+                closing_iso = parse_iso_datetime(j.get("application_end_date"))
+
                 if job_id and title:
                     count_id += 1
                     results.append({
@@ -275,7 +307,9 @@ def fetch_kalibrr_jobs() -> list:
                         "location": loc_display,
                         "work_mode": work_mode,
                         "source": "Kalibrr",
-                        "job_url": f"https://www.kalibrr.com/c/{comp_code}/jobs/{job_id}/{slug}"
+                        "job_url": f"https://www.kalibrr.com/c/{comp_code}/jobs/{job_id}/{slug}",
+                        "posted_at": posted_iso,
+                        "closing_at": closing_iso
                     })
             print(f"[Kalibrr] '{kw}': {count_id} lowongan Indonesia")
             time.sleep(0.8)
@@ -300,8 +334,6 @@ def fetch_jobspy_jobs() -> list:
                 hours_old=72
             )
             if df is not None and not df.empty:
-                by_site = df["site"].value_counts().to_dict() if "site" in df.columns else {}
-                print(f"  -> Hasil per portal: {by_site}")
                 for _, row in df.iterrows():
                     title = str(row.get("title", "")).strip()
                     company = str(row.get("company", "")).strip()
@@ -320,6 +352,7 @@ def fetch_jobspy_jobs() -> list:
                     is_remote = bool(row.get("is_remote", False)) if not pd.isna(row.get("is_remote")) else False
                     work_mode = detect_work_mode(location, title, is_remote)
                     source_label = "Indeed" if "indeed" in site_raw else "LinkedIn"
+                    posted_iso = parse_iso_datetime(row.get("date_posted"))
 
                     results.append({
                         "title": title,
@@ -327,7 +360,9 @@ def fetch_jobspy_jobs() -> list:
                         "location": location,
                         "work_mode": work_mode,
                         "source": source_label,
-                        "job_url": job_url
+                        "job_url": job_url,
+                        "posted_at": posted_iso,
+                        "closing_at": None
                     })
             time.sleep(2.0)
         except Exception as e:
@@ -352,6 +387,7 @@ def transform_and_load(raw_jobs: list, supabase: Client) -> list:
     if not raw_jobs:
         return []
 
+    now_iso = datetime.now(timezone.utc).isoformat()
     records = []
     seen_hashes = set()
 
@@ -385,6 +421,8 @@ def transform_and_load(raw_jobs: list, supabase: Client) -> list:
             "work_mode": work_mode,
             "source": source,
             "job_url": job_url,
+            "posted_at": item.get("posted_at") or now_iso,
+            "closing_at": item.get("closing_at"),
             "_match_score": match_score
         })
 
@@ -413,6 +451,15 @@ def transform_and_load(raw_jobs: list, supabase: Client) -> list:
 
     return []
 
+def format_date_id(iso_str: str | None) -> str:
+    if not iso_str:
+        return ""
+    try:
+        dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
+        return dt.strftime("%d %b %Y")
+    except Exception:
+        return ""
+
 def send_telegram_digest(new_jobs: list):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID or not new_jobs:
         return
@@ -421,10 +468,17 @@ def send_telegram_digest(new_jobs: list):
     for job in new_jobs[:15]:
         score = job.get("_match_score", 70)
         pin = "📍 " if "malang" in job["location"].lower() else "• "
+        posted_txt = format_date_id(job.get("posted_at"))
+        closing_txt = format_date_id(job.get("closing_at"))
+
+        time_info = f"Terbit: {posted_txt}" if posted_txt else ""
+        if closing_txt:
+            time_info += f" | Tutup: {closing_txt}"
+
         lines.append(
             f"{pin}<b>{job['title']}</b> — {job['company']} <i>({score}% Match)</i>\n"
-            f"  [{job['role_cluster']} | {job['location']} | {job['source']}] "
-            f"<a href='{job['job_url']}'>Lamar &rarr;</a>"
+            f"  [{job['role_cluster']} | {job['location']} | {job['source']}]\n"
+            f"  <i>{time_info}</i> • <a href='{job['job_url']}'>Lamar &rarr;</a>"
         )
 
     if len(new_jobs) > 15:
