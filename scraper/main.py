@@ -1,4 +1,5 @@
 import os
+import re
 import hashlib
 import pandas as pd
 import requests
@@ -10,12 +11,72 @@ SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
+# Kata kunci luas: IT, Data, Social Media, MT/Semua Jurusan, Operations & Lowongan Aktif 48 Jam
 SEARCH_QUERIES = [
-    "Software Engineer OR Web Developer",
-    "Data Analyst OR Business Intelligence",
-    "Management Trainee OR ODP",
-    "Operations Associate OR Project Officer"
+    {
+        "term": "Software Engineer OR Web Developer OR UI UX",
+        "google_term": "lowongan kerja Software Engineer Web Developer UI UX Indonesia"
+    },
+    {
+        "term": "Data Analyst OR Business Intelligence OR Digital Marketing",
+        "google_term": "lowongan kerja Data Analyst Business Intelligence Digital Marketing Indonesia"
+    },
+    {
+        "term": "Social Media OR Content Creator OR Copywriter OR Creative",
+        "google_term": "lowongan Social Media Content Creator Copywriter Indonesia"
+    },
+    {
+        "term": "Management Trainee OR ODP OR BFLP OR Fresh Graduate",
+        "google_term": "lowongan kerja semua jurusan fresh graduate management trainee Indonesia"
+    },
+    {
+        "term": "Operations OR Project Officer OR Business Development OR Admin",
+        "google_term": "lowongan kerja semua jurusan admin staff officer Indonesia"
+    },
+    {
+        "term": "Staff OR Associate OR Specialist",
+        "google_term": "lowongan kerja terbaru hari ini semua jurusan Indonesia"
+    },
+    {
+        "term": "Surabaya OR Malang",
+        "google_term": "lowongan kerja terbaru Surabaya Malang semua jurusan"
+    }
 ]
+
+# Daftar kata kunci profesi berlisensi / sekolah khusus / lapangan yang dikecualikan
+EXCLUDED_PATTERNS = [
+    # Medis, Kesehatan & Farmasi
+    r"\bdokter\b", r"\bdoctor\b", r"\bphysician\b", r"\bdentist\b", r"\bveterinarian\b",
+    r"\bapoteker\b", r"\bpharmacist\b", r"\bfarmasi\b", r"\bkefarmasian\b", r"\bttk\b",
+    r"\bperawat\b", r"\bnurse\b", r"\bners\b", r"\bbidan\b", r"\bmidwife\b",
+    r"\bradiografer\b", r"\bfisioterapis\b", r"\bphysiotherapist\b", r"\bahli gizi\b",
+    r"\bnutritionist\b", r"\brekam medis\b", r"\banalis kesehatan\b", r"\blaboratorium klinik\b",
+    # Hukum & Kenotariatan Khusus
+    r"\bnotaris\b", r"\bnotary\b", r"\badvokat\b", r"\bpengacara\b", r"\blawyer\b", r"\bppat\b",
+    # Teknik Fisik, Konstruksi & Tambang Khusus
+    r"\barsitek\b", r"\bteknik sipil\b", r"\bcivil engineer\b", r"\bquantity surveyor\b",
+    r"\bteknik kimia\b", r"\bchemical engineer\b", r"\bpertambangan\b", r"\bmining\b",
+    r"\bgeologi\b", r"\bgeologist\b", r"\bperminyakan\b", r"\bpetroleum\b",
+    r"\balat berat\b", r"\bmekanik\b", r"\bwelder\b", r"\bjuru las\b", r"\bteknisi ac\b",
+    # Pendidikan Formal, Keagamaan & Penerbangan/Pelayaran
+    r"\bguru\b", r"\bteacher\b", r"\bdosen\b", r"\blecturer\b", r"\bustadz\b", r"\bpendeta\b",
+    r"\bpilot\b", r"\bpramugari\b", r"\bpramugara\b", r"\bflight attendant\b", r"\bnakhoda\b", r"\bpelaut\b",
+    # Operasional Lapangan Non-Kantor
+    r"\bchef\b", r"\bkoki\b", r"\bbarista\b", r"\bsopir\b", r"\bdriver\b",
+    r"\bkurir\b", r"\bcourier\b", r"\bsatpam\b", r"\bsecurity guard\b", r"\bcleaning service\b"
+]
+
+def is_excluded_role(title: str) -> bool:
+    t = str(title).lower()
+    for pattern in EXCLUDED_PATTERNS:
+        if re.search(pattern, t):
+            return True
+    # Blokir "Architect" bangunan, tapi izinkan "Solutions/Software/Data/Cloud Architect"
+    if re.search(r"\barchitect\b", t):
+        allowed_tech = ["software", "solution", "data", "cloud", "system", "enterprise", "it", "network", "security", "web"]
+        if not any(k in t for k in allowed_tech):
+            return True
+    return False
 
 def generate_hash(company: str, title: str) -> str:
     raw = f"{str(company).strip().lower()}_{str(title).strip().lower()}"
@@ -23,13 +84,13 @@ def generate_hash(company: str, title: str) -> str:
 
 def classify_cluster(title: str) -> str:
     t = str(title).lower()
-    if any(k in t for k in ["management trainee", "mt ", "odp", "bflp", "mdp", "graduate program", "leadership"]):
+    if any(k in t for k in ["management trainee", "mt ", "odp", "bflp", "mdp", "graduate program", "leadership", "semua jurusan", "fresh graduate"]):
         return "MT/ODP"
-    if any(k in t for k in ["data", "analyst", "bi ", "business intelligence", "machine learning", "digital marketing"]):
+    if any(k in t for k in ["data", "analyst", "bi ", "business intelligence", "machine learning", "digital marketing", "social media", "content", "copywriter", "seo", "creative", "brand", "marketing", "community"]):
         return "Data/Digital"
-    if any(k in t for k in ["software", "developer", "web", "frontend", "backend", "full stack", "ui/ux", "qa", "it ", "programmer", "engineer"]):
+    if any(k in t for k in ["software", "developer", "web", "frontend", "backend", "full stack", "fullstack", "ui/ux", "ui ux", "qa", "it ", "programmer", "engineer", "devops", "cloud", "system", "mobile"]):
         return "IT/Tech"
-    if any(k in t for k in ["operations", "operational", "project", "product", "supply chain", "scrum"]):
+    if any(k in t for k in ["operations", "operational", "project", "product", "supply chain", "scrum", "admin", "hr", "human resource", "recruitment", "business development", "sales", "account executive", "customer", "general affair", "finance"]):
         return "Operations"
     return "Other"
 
@@ -43,16 +104,18 @@ def detect_work_mode(location: str, is_remote: bool) -> str:
 
 def extract_jobs() -> pd.DataFrame:
     all_frames = []
-    for query in SEARCH_QUERIES:
+    for item in SEARCH_QUERIES:
+        query = item["term"]
+        g_query = item["google_term"]
         print(f"Menarik lowongan: {query}...")
         try:
             df = scrape_jobs(
-                site_name=["linkedin", "indeed"],
+                site_name=["linkedin", "google"],
                 search_term=query,
+                google_search_term=g_query,
                 location="Indonesia",
-                results_wanted=15,
-                hours_old=48,
-                country_indeed="Indonesia"
+                results_wanted=25,
+                hours_old=48
             )
             if df is not None and not df.empty:
                 all_frames.append(df)
@@ -78,14 +141,16 @@ def transform_and_load(df: pd.DataFrame, supabase: Client) -> list:
         if not title or title == "nan" or not company or company == "nan" or not job_url:
             continue
 
+        # Lewati lowongan berlisensi / pendidikan khusus
+        if is_excluded_role(title):
+            continue
+
         ext_hash = generate_hash(company, title)
         if ext_hash in seen_hashes:
             continue
         seen_hashes.add(ext_hash)
 
         cluster = classify_cluster(title)
-        if cluster == "Other":
-            continue
 
         location = str(row.get("location", "Indonesia"))
         if location == "nan":
@@ -124,12 +189,16 @@ def send_telegram_digest(new_jobs: list):
         return
 
     lines = [f"🎯 <b>CareerRadar Daily Digest ({len(new_jobs)} Lowongan Baru)</b>\n"]
-    for job in new_jobs[:12]:
+    # Batasi 15 sorotan di Telegram agar tidak melewati batas karakter API Telegram
+    for job in new_jobs[:15]:
         lines.append(
             f"• <b>{job['title']}</b> — {job['company']}\n"
             f"  [{job['role_cluster']} | {job['location']} | {job['work_mode']}] "
             f"<a href='{job['job_url']}'>Lamar &rarr;</a>"
         )
+
+    if len(new_jobs) > 15:
+        lines.append(f"\n<i>...dan {len(new_jobs) - 15} lowongan lainnya sudah tersimpan di Web Dashboard.</i>")
 
     url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
     requests.post(url, json={
