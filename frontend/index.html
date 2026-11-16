@@ -37,7 +37,7 @@
 </head>
 <body class="text-slate-800 min-h-screen antialiased selection:bg-indigo-100 selection:text-indigo-900">
 
-  <!-- Top Navigation Bar (Frosted Glass) -->
+  <!-- Top Navigation Bar -->
   <header class="bg-white/85 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex justify-between items-center gap-4">
       <div class="flex items-center gap-3.5">
@@ -185,11 +185,10 @@
 
           <select id="radarSource" onchange="renderRadarTable()" class="sm:col-span-3 border border-slate-200 bg-slate-50/70 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-500">
             <option value="">Semua Sumber Portal</option>
-            <option value="LinkedIn">LinkedIn</option>
             <option value="JobStreet">JobStreet</option>
-            <option value="Glints">Glints</option>
             <option value="Kalibrr">Kalibrr</option>
-            <option value="Google">Google Jobs</option>
+            <option value="LinkedIn">LinkedIn</option>
+            <option value="Indeed">Indeed</option>
             <option value="Manual">Input Manual</option>
           </select>
         </div>
@@ -199,7 +198,7 @@
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-slate-50/90 text-slate-500 text-[11px] font-bold uppercase tracking-wider border-b border-slate-200/80">
-                <th class="py-3.5 px-4">Posisi & Perusahaan</th>
+                <th class="py-3.5 px-4">Posisi, Perusahaan & Waktu</th>
                 <th class="py-3.5 px-4">Klaster</th>
                 <th class="py-3.5 px-4">Lokasi & Sistem</th>
                 <th class="py-3.5 px-4">Portal</th>
@@ -215,7 +214,6 @@
       <!-- VIEW 2: LAMARAN SAYA (PERSONAL ATS & CATATAN PERMANEN)                -->
       <!-- ===================================================================== -->
       <div id="viewApplied" class="hidden p-4 sm:p-6 space-y-5">
-        <!-- Pipeline Stage Pills -->
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="flex flex-wrap gap-1.5" id="stageFilterTabs">
             <button onclick="setStageFilter('')" class="stage-btn bg-indigo-600 text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl transition" data-val="">Semua Lamaran</button>
@@ -229,7 +227,6 @@
           <span id="appliedCountLabel" class="text-xs font-medium text-slate-400">0 lamaran tercatat</span>
         </div>
 
-        <!-- Search & Cluster Filter for Applied -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="sm:col-span-2 relative">
             <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -248,7 +245,6 @@
           </select>
         </div>
 
-        <!-- Applied Data Table -->
         <div class="overflow-x-auto border border-slate-200/80 rounded-2xl">
           <table class="w-full text-left border-collapse">
             <thead>
@@ -327,17 +323,23 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Lokasi</label>
-            <input type="text" id="inLocation" placeholder="Malang, East Java" value="Malang, East Java" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+            <input type="text" id="inLocation" value="Malang, East Java" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
           </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Batas Akhir Lowongan (Opsional)</label>
+            <input type="date" id="inClosingDate" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Sumber Info</label>
             <input type="text" id="inSource" placeholder="JobStreet / Instagram / Web" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
           </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Link Lowongan / Portal Karir *</label>
-          <input type="url" id="inUrl" placeholder="https://..." class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Link Lowongan *</label>
+            <input type="url" id="inUrl" placeholder="https://..." class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+          </div>
         </div>
 
         <div id="manualAppFields" class="space-y-3 pt-2.5 border-t border-slate-100">
@@ -411,9 +413,15 @@
           </div>
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Versi CV / Portofolio yang Dikirim</label>
-          <input type="text" id="trackCvVersion" placeholder="Contoh: CV_Bagas_UIUX_v2.pdf" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Versi CV / Portofolio</label>
+            <input type="text" id="trackCvVersion" placeholder="CV_Bagas_UIUX_v2.pdf" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Batas Akhir Lowongan</label>
+            <input type="date" id="trackClosingDate" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+          </div>
         </div>
 
         <div>
@@ -446,9 +454,6 @@
   </div>
 
   <script>
-    // =========================================================================
-    // KONFIGURASI SUPABASE
-    // =========================================================================
     const SUPABASE_URL = "https://zhvgxprefzfnrfzdwybj.supabase.co";
     const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_TX_8nFm72DZUWyOGqpGNZg_zGr4aO79";
 
@@ -537,7 +542,55 @@
     }
 
     // =========================================================================
-    // SCORING & PRIORITAS DAERAH (TERKALIBRASI CV BAGAS DWI ARDIANTO)
+    // HELPER WAKTU POSTING & BATAS TUTUP LOWONGAN
+    // =========================================================================
+    function formatPostedBadge(postedStr, createdStr) {
+      const raw = postedStr || createdStr;
+      if (!raw) return "";
+      const dt = new Date(raw);
+      if (isNaN(dt.getTime())) return "";
+
+      const now = new Date();
+      const diffMs = now - dt;
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+      let label = dt.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+      if (diffHours < 1) label = "Baru saja";
+      else if (diffHours < 24 && dt.getDate() === now.getDate()) label = `${diffHours} jam lalu`;
+      else if (diffDays <= 1) label = "Kemarin";
+      else if (diffDays < 7) label = `${diffDays} hari lalu`;
+
+      return `<span class="inline-flex items-center gap-1 text-[11px] text-slate-500">🕒 Terbit: ${esc(label)}</span>`;
+    }
+
+    function formatClosingBadge(closingStr) {
+      if (!closingStr) return "";
+      const end = new Date(closingStr);
+      if (isNaN(end.getTime())) return "";
+
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const endStart = new Date(end);
+      endStart.setHours(0, 0, 0, 0);
+
+      const diffDays = Math.round((endStart - todayStart) / (1000 * 60 * 60 * 24));
+      const dateText = end.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+
+      if (diffDays < 0) {
+        return `<span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200/80">⚠️ Ditutup (${dateText})</span>`;
+      }
+      if (diffDays === 0) {
+        return `<span class="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200/80">⏳ Tutup Hari Ini!</span>`;
+      }
+      if (diffDays <= 3) {
+        return `<span class="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200/80">⏳ Tutup ${diffDays} hari lagi (${dateText})</span>`;
+      }
+      return `<span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">📅 Tutup: ${dateText}</span>`;
+    }
+
+    // =========================================================================
+    // SCORING & PRIORITAS DAERAH
     // =========================================================================
     function getCvMatchScore(r) {
       const t = (r.title || "").toLowerCase();
@@ -579,13 +632,11 @@
       const low = s.toLowerCase();
       if (low.includes("linkedin")) return `<span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-sky-50 text-sky-700 border border-sky-200/70">LinkedIn</span>`;
       if (low.includes("jobstreet")) return `<span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200/70">JobStreet</span>`;
-      if (low.includes("glints")) return `<span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-cyan-50 text-cyan-700 border border-cyan-200/70">Glints</span>`;
       if (low.includes("kalibrr")) return `<span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200/70">Kalibrr</span>`;
-      if (low.includes("dealls")) return `<span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200/70">Dealls</span>`;
+      if (low.includes("indeed")) return `<span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-violet-50 text-violet-700 border border-violet-200/70">Indeed</span>`;
       return `<span class="text-xs font-medium px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/70">${esc(s)}</span>`;
     }
 
-    // Navigasi Tab Utama
     function switchMainTab(tab) {
       activeMainTab = tab;
       const btnRadar = document.getElementById("tabBtnRadar");
@@ -692,7 +743,6 @@
         return matchRegion && matchCluster && matchMode && matchSource && matchText;
       });
 
-      // Urutkan: Prioritas Malang -> Kecocokan CV Tertinggi
       filtered.sort((a, b) => {
         const regDiff = getRegionScore(a) - getRegionScore(b);
         if (regDiff !== 0) return regDiff;
@@ -716,6 +766,8 @@
       tbody.innerHTML = filtered.map(r => {
         const score = getCvMatchScore(r);
         const isMalang = (r.location || "").toLowerCase().includes("malang");
+        const postedBadge = formatPostedBadge(r.posted_at, r.created_at);
+        const closingBadge = formatClosingBadge(r.closing_at);
 
         let scoreBadge = `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">${score}% Match</span>`;
         if (score >= 85) {
@@ -735,7 +787,11 @@
                 <span class="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">${esc(r.title)}</span>
                 ${scoreBadge}
               </div>
-              <div class="text-xs font-medium text-slate-500 mt-1">${esc(r.company)}</div>
+              <div class="text-xs font-medium text-slate-600 mt-1">${esc(r.company)}</div>
+              <div class="flex flex-wrap items-center gap-2 mt-1.5">
+                ${postedBadge}
+                ${closingBadge}
+              </div>
             </td>
             <td class="py-4 px-4">
               <span class="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700">${esc(r.role_cluster)}</span>
@@ -846,6 +902,7 @@
         const schText = r.next_schedule
           ? new Date(r.next_schedule).toLocaleString("id-ID", { dateStyle: "medium", timeStyle: "short" })
           : "";
+        const closingBadge = formatClosingBadge(r.closing_at);
 
         return `
           <tr class="hover:bg-slate-50/90 transition-colors">
@@ -855,6 +912,7 @@
                 <a href="${esc(r.job_url)}" target="_blank" rel="noopener noreferrer" title="Buka Portal Lowongan" class="text-slate-400 hover:text-indigo-600 text-xs font-bold">↗</a>
               </div>
               <div class="text-xs font-medium text-slate-500 mt-1">${esc(r.company)} • <span class="text-slate-400">${esc(r.role_cluster)} (${esc(r.work_mode)})</span></div>
+              ${closingBadge ? `<div class="mt-1.5">${closingBadge}</div>` : ""}
             </td>
             <td class="py-4 px-4">
               <span class="inline-block text-xs font-bold px-2.5 py-1 rounded-full border ${badgeMap[r.app_status] || 'bg-slate-100 text-slate-700'}">
@@ -891,6 +949,7 @@
       document.getElementById("inTitle").value = "";
       document.getElementById("inCompany").value = "";
       document.getElementById("inLocation").value = "Malang, East Java";
+      document.getElementById("inClosingDate").value = "";
       document.getElementById("inSource").value = "";
       document.getElementById("inUrl").value = "";
       document.getElementById("inCvVersion").value = "";
@@ -923,6 +982,7 @@
       const btn = document.getElementById("btnSaveManual");
       btn.disabled = true;
 
+      const closingVal = document.getElementById("inClosingDate").value;
       const extHash = await sha256(`${company.toLowerCase()}_${title.toLowerCase()}_${Date.now()}`);
       const { data: insertedJob, error } = await sb.from("job_listings").insert({
         external_hash: extHash,
@@ -932,7 +992,9 @@
         work_mode: document.getElementById("inMode").value,
         location: document.getElementById("inLocation").value.trim() || "Malang, East Java",
         source: document.getElementById("inSource").value.trim() || "Manual",
-        job_url
+        job_url,
+        posted_at: new Date().toISOString(),
+        closing_at: closingVal ? new Date(closingVal + "T23:59:59").toISOString() : null
       }).select().single();
 
       if (error) {
@@ -974,6 +1036,12 @@
       document.getElementById("trackAppliedDate").value = rec.applied_date || new Date().toISOString().split("T")[0];
       document.getElementById("trackCvVersion").value = rec.cv_version || "";
       document.getElementById("trackNotes").value = rec.notes || "";
+
+      if (rec.closing_at) {
+        document.getElementById("trackClosingDate").value = new Date(rec.closing_at).toISOString().split("T")[0];
+      } else {
+        document.getElementById("trackClosingDate").value = "";
+      }
 
       if (rec.next_schedule) {
         const dt = new Date(rec.next_schedule);
@@ -1018,6 +1086,7 @@
       const jobId = document.getElementById("trackJobId").value;
       const newTitle = document.getElementById("trackEditTitle").value.trim();
       const newCompany = document.getElementById("trackEditCompany").value.trim();
+      const closingVal = document.getElementById("trackClosingDate").value;
       const status = document.getElementById("trackStatus").value;
       const appliedDate = document.getElementById("trackAppliedDate").value;
       const cvVersion = document.getElementById("trackCvVersion").value.trim();
@@ -1028,7 +1097,11 @@
       btn.disabled = true;
 
       if (newTitle && newCompany) {
-        await sb.from("job_listings").update({ title: newTitle, company: newCompany }).eq("id", jobId);
+        await sb.from("job_listings").update({
+          title: newTitle,
+          company: newCompany,
+          closing_at: closingVal ? new Date(closingVal + "T23:59:59").toISOString() : null
+        }).eq("id", jobId);
       }
 
       const { error } = await sb.from("applications").upsert({
