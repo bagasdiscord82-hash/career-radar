@@ -19,6 +19,9 @@ HTTP_HEADERS = {
     "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7"
 }
 
+# ==============================================================================
+# 1. RENCANA QUERY SCRAPING (LOKAL MALANG + KREATIF/IT + LEADERSHIP FAST-TRACK)
+# ==============================================================================
 JOBSPY_PLANS = [
     {
         "location": "Malang, East Java, Indonesia",
@@ -29,8 +32,14 @@ JOBSPY_PLANS = [
     {
         "location": "Malang, East Java, Indonesia",
         "tag_city": "Malang",
-        "term": "IT Support OR UI UX OR Web Developer OR Staff OR Operations OR Event",
+        "term": "IT Support OR UI UX OR Web Developer OR Operations OR Event",
         "results": 20
+    },
+    {
+        "location": "Malang, East Java, Indonesia",
+        "tag_city": "Malang",
+        "term": "Management Trainee OR Management Development Program OR Officer Development Program OR Graduate Trainee",
+        "results": 15
     },
     {
         "location": "Surabaya, East Java, Indonesia",
@@ -41,19 +50,51 @@ JOBSPY_PLANS = [
     {
         "location": "Indonesia",
         "tag_city": "",
-        "term": "UI UX Designer OR Graphic Designer OR Social Media Specialist OR Management Trainee",
+        "term": "UI UX Designer OR Graphic Designer OR Social Media Specialist",
+        "results": 15
+    },
+    {
+        "location": "Indonesia",
+        "tag_city": "",
+        "term": '"Management Trainee" OR "Management Development Program" OR "Officer Development Program" OR "Graduate Trainee" OR "Future Leaders"',
+        "results": 20
+    },
+    {
+        "location": "Indonesia",
+        "tag_city": "",
+        "term": '"Leadership Development Program" OR "Leadership Acceleration" OR "Accelerated Development Program" OR "Management Associate" OR "Graduate Development Program"',
+        "results": 15
+    },
+    {
+        "location": "Indonesia",
+        "tag_city": "",
+        "term": '"BFLP" OR "PCPM" OR "GPTP" OR "UFLP" OR "PLDP" OR "AGP" OR "BFL" OR "SeedZ" OR "The Complete Banker"',
         "results": 15
     }
 ]
 
 JOBSTREET_PLANS = [
+    # Prioritas Malang Raya
     {"keywords": "Graphic Designer", "where": "Malang", "tag_city": "Malang"},
     {"keywords": "Social Media", "where": "Malang", "tag_city": "Malang"},
     {"keywords": "IT Support", "where": "Malang", "tag_city": "Malang"},
     {"keywords": "Admin", "where": "Malang", "tag_city": "Malang"},
+    {"keywords": "Management Trainee", "where": "Malang", "tag_city": "Malang"},
+    # Surabaya
+    {"keywords": "Social Media Specialist", "where": "Surabaya", "tag_city": "Surabaya"},
+    {"keywords": "Management Trainee", "where": "Surabaya", "tag_city": "Surabaya"},
+    # Nasional (Spesialis & Leadership Fast-Track)
     {"keywords": "UI UX Designer", "where": "Indonesia", "tag_city": ""},
     {"keywords": "Management Trainee", "where": "Indonesia", "tag_city": ""},
-    {"keywords": "Social Media Specialist", "where": "Surabaya", "tag_city": "Surabaya"}
+    {"keywords": "Management Development Program", "where": "Indonesia", "tag_city": ""},
+    {"keywords": "Officer Development Program", "where": "Indonesia", "tag_city": ""},
+    {"keywords": "Graduate Trainee", "where": "Indonesia", "tag_city": ""},
+    {"keywords": "Future Leaders", "where": "Indonesia", "tag_city": ""},
+    {"keywords": "Management Associate", "where": "Indonesia", "tag_city": ""},
+    {"keywords": "Leadership Acceleration", "where": "Indonesia", "tag_city": ""},
+    {"keywords": "Accelerated Development Program", "where": "Indonesia", "tag_city": ""},
+    {"keywords": "BFLP", "where": "Indonesia", "tag_city": ""},
+    {"keywords": "PCPM", "where": "Indonesia", "tag_city": ""},
 ]
 
 KALIBRR_KEYWORDS = [
@@ -61,10 +102,170 @@ KALIBRR_KEYWORDS = [
     "Graphic Design",
     "Social Media",
     "IT Support",
+    "Malang",
     "Management Trainee",
-    "Malang"
+    "Management Development Program",
+    "Officer Development Program",
+    "Graduate Trainee",
+    "Future Leaders",
+    "Management Associate",
+    "Leadership Development",
+    "Accelerated Development",
+    "Associate Product Manager"
 ]
 
+# ==============================================================================
+# 2. KAMUS LEADERSHIP FAST-TRACK (UNIVERSAL, BUMN & BRANDED CORPORATE)
+# ==============================================================================
+LEADERSHIP_PHRASE_PATTERNS = [
+    # Universal Management & Leadership
+    r"\bmanagement trainee\b",
+    r"\bmanagement development program(?:me)?\b",
+    r"\bmanagement associate(?: program(?:me)?)?\b",
+    r"\bleadership development program(?:me)?\b",
+    r"\bleadership acceleration(?: program(?:me)?)?\b",
+    r"\bfuture leader(?:s)?(?: program(?:me)?)?\b",
+    r"\bglobal leader(?:s|ship)? program(?:me)?\b",
+    r"\byoung leader(?:s)? program(?:me)?\b",
+    r"\bemerging leader(?:s)? program(?:me)?\b",
+    r"\baccelerated development program(?:me)?\b",
+    r"\btalent acceleration program(?:me)?\b",
+    r"\bexecutive trainee\b",
+    r"\bexecutive development program(?:me)?\b",
+    # Graduate & Officer
+    r"\bofficer development program(?:me)?\b",
+    r"\bgraduate trainee\b",
+    r"\bgraduate program(?:me)?\b",
+    r"\bgraduate development program(?:me)?\b",
+    r"\bfresh graduate development program(?:me)?\b",
+    r"\bfresh graduate program(?:me)?\b",
+    r"\bassociate development program(?:me)?\b",
+    r"\bfast[\s-]?track(?: program(?:me)?)?\b",
+    r"\bnext[\s-]?gen leader(?:s)?\b",
+    r"\bnext[\s-]?gen program(?:me)?\b",
+    # Functional Trainee
+    r"\bcommercial trainee\b",
+    r"\bsales trainee\b",
+    r"\boperations trainee\b",
+    r"\bsupply chain trainee\b",
+    r"\bstore management trainee\b",
+    r"\bretail management trainee\b",
+    r"\bit trainee\b",
+    r"\btech trainee\b",
+    r"\bassociate product manager\b",
+    r"\bfinance trainee\b",
+    r"\bhr trainee\b",
+    r"\bplanters development program(?:me)?\b",
+    # Istilah Bahasa Indonesia (BUMN / Regulator / Lembaga Negara)
+    r"\bpendidikan calon pimpinan\b",
+    r"\bpendidikan calon pegawai asisten manajer\b",
+    r"\bpendidikan calon staf\b",
+    r"\bbimbingan profesi sarjana\b",
+    r"\bbimbingan praktis ahli\b",
+    r"\bkader pimpinan\b",
+    r"\bcalon pimpinan\b",
+    r"\bakselerasi kepemimpinan\b",
+    # Branded Corporate Programs: Perbankan, Keuangan & Regulator
+    r"\bbrilian future leader(?:s)?(?: program)?\b",
+    r"\bbca development program\b",
+    r"\bwealth management program\b",
+    r"\brelationship manager development program\b",
+    r"\bhi[\s-]?movers odp\b",
+    r"\bthe complete banker\b",
+    r"\bdanamon bankers trainee\b",
+    r"\bpermatabanker\b",
+    r"\bskill enhancement (?:&|and) education development\b",
+    r"\bocbc management associate\b",
+    r"\bocbc.*steam\b",
+    r"\bglobal maybank apprentice program(?:me)?\b",
+    r"\binternational graduate program(?:me)?\b",
+    r"\bfifgroup accelerated development program\b",
+    r"\ballianz management associate\b",
+    r"\bprudential graduate associate\b",
+    # Branded Corporate Programs: FMCG, Agribisnis & Manufaktur
+    r"\bunilever future leaders program(?:me)?\b",
+    r"\bmt star\b",
+    r"\bl['’]?oreal seedz\b",
+    r"\bseedz\b",
+    r"\bindofood management trainee\b",
+    r"\bbogasari development program\b",
+    r"\bparagon leader development program\b",
+    r"\bnestl[eé] management trainee\b",
+    r"\bmayora development program\b",
+    r"\bgarudafood management trainee\b",
+    r"\bkalbe management trainee\b",
+    r"\bkalbe ldp\b",
+    r"\bsampoerna graduate trainee\b",
+    r"\bdjarum management trainee\b",
+    r"\bgudang garam development program\b",
+    r"\bwings management trainee\b",
+    r"\bccep graduate program(?:me)?\b",
+    # Branded Corporate Programs: Konglomerasi, Otomotif, Energi & BUMN
+    r"\bastra graduate program\b",
+    r"\bahm management trainee\b",
+    r"\bsinar mas management trainee\b",
+    r"\bapp future leaders\b",
+    r"\btriputra management trainee\b",
+    r"\btriputra executive development program\b",
+    r"\bct corp management trainee\b",
+    r"\blippo management trainee\b",
+    r"\bsamudera management development program\b",
+    r"\bmeratus management trainee\b",
+    r"\bmeratus star program\b",
+    r"\bgreat people trainee program\b",
+    r"\but future leaders\b",
+    r"\bpama mt\b",
+    r"\btrakindo management trainee\b",
+    # Branded Corporate Programs: Teknologi, E-Commerce & Ritel
+    r"\bshopee glp\b",
+    r"\bsea map\b",
+    r"\bgojek accelerates\b",
+    r"\btraveloka management associate\b",
+    r"\bgrab graduate program(?:me)?\b",
+    r"\bblibli future leaders\b",
+    r"\bkawan lama management trainee\b",
+    r"\bmap management trainee\b",
+    r"\berajaya management trainee\b",
+    r"\balfamart management trainee\b",
+    r"\bindomaret mdp\b",
+]
+
+# Akronim huruf kapital (dicocokkan case-sensitive pada token judul agar tidak salah tangkap)
+LEADERSHIP_UPPER_ACRONYMS = {
+    "MT", "MDP", "LDP", "LAP", "FLP", "GLP", "YLP", "ELP", "ADP", "TAP",
+    "EDP", "ODP", "GT", "GDP", "FGDP", "FGP", "RMT", "APM", "PCP", "PCPM", "PCS",
+    "BPS", "BPA", "BFLP", "BDP", "WMP", "RMDP", "TCB", "DBT", "GMAP",
+    "IGP", "FADP", "AMA", "UFLP", "IMT", "PLDP", "NMT", "GMT", "KMT", "GDMP",
+    "AGP", "TMT", "TEDP", "SMDP", "GPTP", "BFL", "KLMT"
+}
+
+# ==============================================================================
+# 3. FILTER PENGECUALIAN (NEGATIVE KEYWORDS - WAJIB DIBUANG)
+# ==============================================================================
+CLOSED_STATUS_PATTERNS = [
+    r"\[closed\]", r"\(closed\)", r"\bclosed\b", r"\bexpired\b",
+    r"\blowongan ditutup\b", r"\bsudah ditutup\b"
+]
+
+# Status Non-Tetap / Magang (dibuang mutlak)
+NON_PERMANENT_PATTERNS = [
+    r"\bintern\b", r"\binternship\b", r"\bmagang\b", r"\bpkl\b",
+    r"\bkerja praktik\b", r"\bpraktek kerja\b", r"\bfreelance\b",
+    r"\bpart[\s-]?time\b", r"\bdaily worker\b", r"\bharian\b", r"\bkontrak harian\b"
+]
+
+# Operasional Lapangan / Non-Akselerasi (dibuang KECUALI merupakan jalur Management Trainee / Leadership)
+FIELD_OPERATIONAL_PATTERNS = [
+    r"\bteam leader\b", r"\bsales leader\b", r"\bshift leader\b",
+    r"\bcrew\b", r"\bbarista\b", r"\bkasir\b", r"\bcashier\b",
+    r"\bdriver\b", r"\bsopir\b", r"\bkurir\b", r"\bcourier\b",
+    r"\bsecurity\b", r"\bsatpam\b", r"\bsecurity guard\b",
+    r"\boperator produksi\b", r"\bhelper\b", r"\bspg\b", r"\bspb\b",
+    r"\bmerchandiser\b", r"\bmotoris\b", r"\bcleaning service\b",
+    r"\badmin gudang\b"
+]
+
+# Profesi Spesifik Non-Target (Medis, Hukum, Sipil, Tambang, Guru, dll.)
 EXCLUDED_PROFESSION_PATTERNS = [
     r"\bdokter\b", r"\bdoctor\b", r"\bphysician\b", r"\bdentist\b", r"\bveterinarian\b",
     r"\bapoteker\b", r"\bpharmacist\b", r"\bfarmasi\b", r"\bkefarmasian\b", r"\bttk\b",
@@ -78,15 +279,19 @@ EXCLUDED_PROFESSION_PATTERNS = [
     r"\balat berat\b", r"\bmekanik\b", r"\bwelder\b", r"\bjuru las\b", r"\bteknisi ac\b",
     r"\bguru\b", r"\bteacher\b", r"\bdosen\b", r"\blecturer\b", r"\bustadz\b", r"\bpendeta\b",
     r"\bpilot\b", r"\bpramugari\b", r"\bpramugara\b", r"\bflight attendant\b", r"\bnakhoda\b", r"\bpelaut\b",
-    r"\bchef\b", r"\bkoki\b", r"\bbarista\b", r"\bsopir\b", r"\bdriver\b",
-    r"\bkurir\b", r"\bcourier\b", r"\bsatpam\b", r"\bsecurity guard\b", r"\bcleaning service\b"
+    r"\bchef\b", r"\bkoki\b"
 ]
 
 EXCLUDED_SENIORITY_PATTERNS = [
-    r"\bsenior\b", r"\bsr\.?\b", r"\blead\b", r"\bteam leader\b", r"\bmanager\b",
+    r"\bsenior\b", r"\bsr\.?\b", r"\blead\b", r"\bmanager\b",
     r"\bmanajer\b", r"\bhead of\b", r"\bdirector\b", r"\bdirektur\b", r"\bvp\b",
     r"\bvice president\b", r"\bprincipal\b", r"\bsupervisor\b", r"\bspv\b", r"\bchief\b"
 ]
+
+SPAM_URL_PATTERNS = [
+    "javascript:", "mailto:", "localhost", "127.0.0.1", "example.com"
+]
+
 
 def parse_iso_datetime(val) -> str | None:
     """Mengonversi berbagai format tanggal/timestamp portal menjadi ISO 8601 UTC."""
@@ -122,22 +327,72 @@ def parse_iso_datetime(val) -> str | None:
         except Exception:
             return None
 
+
+def is_valid_job_url(url: str) -> bool:
+    u = str(url or "").strip().lower()
+    if not (u.startswith("http://") or u.startswith("https://")):
+        return False
+    if "." not in u:
+        return False
+    return not any(bad in u for bad in SPAM_URL_PATTERNS)
+
+
+def is_expired_listing(closing_iso: str | None) -> bool:
+    if not closing_iso:
+        return False
+    try:
+        dt = datetime.fromisoformat(closing_iso.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt < datetime.now(timezone.utc)
+    except Exception:
+        return False
+
+
+def is_leadership_program(title: str) -> bool:
+    """Mendeteksi program akselerasi kepemimpinan (universal, BUMN, & branded corporate)."""
+    raw_title = str(title or "")
+    t_low = raw_title.lower()
+
+    if any(re.search(pattern, t_low) for pattern in LEADERSHIP_PHRASE_PATTERNS):
+        return True
+
+    upper_tokens = re.findall(r"\b[A-Z]{2,6}\b", raw_title)
+    return any(tok in LEADERSHIP_UPPER_ACRONYMS for tok in upper_tokens)
+
+
 def is_excluded_role(title: str) -> bool:
-    t = str(title).lower()
+    """Mengeliminasi lowongan sesuai daftar negative keywords."""
+    t_low = str(title or "").lower()
+
+    # 1. Lowongan yang sudah ditutup / expired
+    if any(re.search(p, t_low) for p in CLOSED_STATUS_PATTERNS):
+        return True
+
+    # 2. Status Non-Tetap / Magang / Freelance / Part-time / Daily Worker
+    if any(re.search(p, t_low) for p in NON_PERMANENT_PATTERNS):
+        return True
+
+    # 3. Profesi non-target (medis, hukum, teknik sipil/tambang, guru, dll.)
     for pattern in EXCLUDED_PROFESSION_PATTERNS:
-        if re.search(pattern, t):
+        if re.search(pattern, t_low):
             return True
 
-    if not any(mt in t for mt in ["management trainee", "mt ", "mdp", "odp", "bflp"]):
+    # 4. Posisi operasional lapangan & senioritas (dibuang KECUALI jalur Management Trainee / Leadership)
+    if not is_leadership_program(title):
+        if any(re.search(p, t_low) for p in FIELD_OPERATIONAL_PATTERNS):
+            return True
         for s_pattern in EXCLUDED_SENIORITY_PATTERNS:
-            if re.search(s_pattern, t):
+            if re.search(s_pattern, t_low):
                 return True
 
-    if re.search(r"\barchitect\b", t):
+    if re.search(r"\barchitect\b", t_low):
         allowed_tech = ["software", "solution", "data", "cloud", "system", "it", "web"]
-        if not any(k in t for k in allowed_tech):
+        if not any(k in t_low for k in allowed_tech):
             return True
+
     return False
+
 
 def calculate_cv_match_score(title: str, location: str, work_mode: str) -> int:
     t = str(title).lower()
@@ -147,7 +402,7 @@ def calculate_cv_match_score(title: str, location: str, work_mode: str) -> int:
     tier1_keywords = [
         "ui/ux", "ui ux", "figma", "graphic design", "desain grafis", "social media",
         "visual content", "content creator", "it support", "helpdesk", "technical support",
-        "network", "jaringan", "event", "management trainee", "odp", "bflp"
+        "network", "jaringan", "event"
     ]
     tier2_keywords = [
         "creative", "canva", "digital marketing", "e-commerce", "ecommerce", "marketplace",
@@ -156,7 +411,7 @@ def calculate_cv_match_score(title: str, location: str, work_mode: str) -> int:
         "fresh graduate", "semua jurusan", "copywriter", "brand"
     ]
 
-    if any(k in t for k in tier1_keywords):
+    if is_leadership_program(title) or any(k in t for k in tier1_keywords):
         score += 35
     elif any(k in t for k in tier2_keywords):
         score += 22
@@ -170,13 +425,15 @@ def calculate_cv_match_score(title: str, location: str, work_mode: str) -> int:
 
     return min(score, 99)
 
+
 def generate_hash(company: str, title: str) -> str:
     raw = f"{str(company).strip().lower()}_{str(title).strip().lower()}"
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
+
 def classify_cluster(title: str) -> str:
     t = str(title).lower()
-    if any(k in t for k in ["management trainee", "mt ", "odp", "bflp", "mdp", "graduate program", "leadership", "semua jurusan", "fresh graduate"]):
+    if is_leadership_program(title) or any(k in t for k in ["semua jurusan", "fresh graduate"]):
         return "MT/ODP"
     if any(k in t for k in ["social media", "graphic design", "desain grafis", "content", "creative", "visual", "copywriter", "digital marketing", "e-commerce", "marketplace", "brand", "data", "analyst", "seo"]):
         return "Data/Digital"
@@ -186,6 +443,7 @@ def classify_cluster(title: str) -> str:
         return "Operations"
     return "Other"
 
+
 def detect_work_mode(location: str, title: str, is_remote: bool = False) -> str:
     combined = f"{location} {title}".lower()
     if is_remote or "remote" in combined or "wfh" in combined or "work from home" in combined:
@@ -193,6 +451,7 @@ def detect_work_mode(location: str, title: str, is_remote: bool = False) -> str:
     if "hybrid" in combined:
         return "Hybrid"
     return "Onsite"
+
 
 # ==============================================================================
 # SCRAPER 1: JOBSTREET INDONESIA (API v5)
@@ -256,6 +515,7 @@ def fetch_jobstreet_jobs() -> list:
             print(f"[JobStreet] Error '{plan['keywords']}': {e}")
     return results
 
+
 # ==============================================================================
 # SCRAPER 2: KALIBRR INDONESIA (DIRECT JSON BOARD API)
 # ==============================================================================
@@ -317,6 +577,7 @@ def fetch_kalibrr_jobs() -> list:
             print(f"[Kalibrr] Error '{kw}': {e}")
     return results
 
+
 # ==============================================================================
 # SCRAPER 3 & 4: LINKEDIN + INDEED INDONESIA (JOBSPY)
 # ==============================================================================
@@ -369,6 +630,7 @@ def fetch_jobspy_jobs() -> list:
             print(f"[LinkedIn & Indeed] Peringatan pada '{plan['location']}': {e}")
     return results
 
+
 def refresh_unapplied_radar(supabase: Client, max_age_hours: int = 48):
     cutoff = (datetime.now(timezone.utc) - timedelta(hours=max_age_hours)).isoformat()
     applied_res = supabase.table("applications").select("job_id").neq("status", "Wishlist").execute()
@@ -383,6 +645,7 @@ def refresh_unapplied_radar(supabase: Client, max_age_hours: int = 48):
             supabase.table("job_listings").delete().in_("id", batch).execute()
         print(f"Auto-refresh: {len(stale_ids)} lowongan lama (> {max_age_hours} jam) dibersihkan.")
 
+
 def transform_and_load(raw_jobs: list, supabase: Client) -> list:
     if not raw_jobs:
         return []
@@ -395,8 +658,12 @@ def transform_and_load(raw_jobs: list, supabase: Client) -> list:
         title = str(item.get("title", "")).strip()
         company = str(item.get("company", "")).strip()
         job_url = str(item.get("job_url", "")).strip()
+        closing_iso = item.get("closing_at")
 
-        if not title or not company or not job_url:
+        if not title or not company or not is_valid_job_url(job_url):
+            continue
+
+        if is_expired_listing(closing_iso):
             continue
 
         if is_excluded_role(title):
@@ -422,7 +689,7 @@ def transform_and_load(raw_jobs: list, supabase: Client) -> list:
             "source": source,
             "job_url": job_url,
             "posted_at": item.get("posted_at") or now_iso,
-            "closing_at": item.get("closing_at"),
+            "closing_at": closing_iso,
             "_match_score": match_score
         })
 
@@ -451,6 +718,7 @@ def transform_and_load(raw_jobs: list, supabase: Client) -> list:
 
     return []
 
+
 def format_date_id(iso_str: str | None) -> str:
     if not iso_str:
         return ""
@@ -459,6 +727,7 @@ def format_date_id(iso_str: str | None) -> str:
         return dt.strftime("%d %b %Y")
     except Exception:
         return ""
+
 
 def send_telegram_digest(new_jobs: list):
     if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID or not new_jobs:
@@ -491,6 +760,7 @@ def send_telegram_digest(new_jobs: list):
         "parse_mode": "HTML",
         "disable_web_page_preview": True
     }, timeout=15)
+
 
 if __name__ == "__main__":
     supabase_client = create_client(SUPABASE_URL, SUPABASE_KEY)
