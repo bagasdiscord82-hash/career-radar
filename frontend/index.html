@@ -7,256 +7,293 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #F8FAFC;
-      background-image: radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.05) 0px, transparent 50%),
-                        radial-gradient(at 100% 0%, rgba(16, 185, 129, 0.04) 0px, transparent 50%);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #F6F7F9;
+      color: #18181B;
     }
-    .card-surface {
-      background: #FFFFFF;
-      border: 1px solid rgba(226, 232, 240, 0.85);
-      box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03), 0 1px 2px rgba(15, 23, 42, 0.02);
+    .font-mono-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+    .tabular-nums {
+      font-variant-numeric: tabular-nums;
+    }
+    .surface-card {
+      background-color: #FFFFFF;
+      border: 1px solid #E4E4E7;
     }
     .tab-active {
-      border-bottom: 2px solid #4F46E5;
-      color: #4F46E5;
-      font-weight: 700;
+      border-bottom: 2px solid #18181B;
+      color: #18181B;
+      font-weight: 600;
     }
     .tab-inactive {
       border-bottom: 2px solid transparent;
-      color: #64748B;
+      color: #71717A;
       font-weight: 500;
     }
     .tab-inactive:hover {
-      color: #0F172A;
+      color: #18181B;
     }
   </style>
 </head>
-<body class="text-slate-800 min-h-screen antialiased selection:bg-indigo-100 selection:text-indigo-900">
+<body class="min-h-screen antialiased selection:bg-zinc-900 selection:text-white">
 
   <!-- Top Navigation Bar -->
-  <header class="bg-white/85 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex justify-between items-center gap-4">
-      <div class="flex items-center gap-3.5">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center text-white font-extrabold text-sm tracking-tight shadow-md shadow-indigo-200">
-          CR
+  <header class="bg-white border-b border-zinc-200 sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center text-white">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="9" />
+            <circle cx="12" cy="12" r="4" />
+            <path stroke-linecap="round" d="M12 3v3m0 12v3M3 12h3m12 0h3" />
+          </svg>
         </div>
-        <div>
-          <div class="flex items-center gap-2.5">
-            <h1 class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">CareerRadar</h1>
-            <span class="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/70">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Live Sync
-            </span>
-          </div>
-          <p class="text-[11px] text-slate-500 hidden sm:block">Malang Priority Radar & Personal Application Workspace</p>
+        <div class="flex items-baseline gap-2.5">
+          <h1 class="text-sm sm:text-base font-bold text-zinc-900 tracking-tight">CareerRadar</h1>
+          <span class="hidden sm:inline-block text-xs text-zinc-400">/</span>
+          <span class="hidden sm:inline-block text-xs text-zinc-500 font-medium">Malang & National Job Workspace</span>
         </div>
       </div>
 
-      <div class="flex items-center gap-2.5">
-        <button onclick="openAddModal()" class="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700 active:scale-[0.99] text-white text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-xl shadow-sm shadow-indigo-200 transition-all">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+      <div class="flex items-center gap-2">
+        <span class="hidden md:inline-flex items-center gap-1.5 text-[11px] font-medium text-zinc-500 px-2.5 py-1 rounded-md bg-zinc-100 border border-zinc-200/80">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          Supabase Connected
+        </span>
+
+        <button onclick="openAddModal()" class="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
-          <span>Catat Lowongan / Lamaran</span>
+          <span>Catat Lamaran</span>
         </button>
-        <button onclick="fetchAllData()" title="Muat Ulang Data Terbaru" class="p-2.5 text-slate-600 hover:text-indigo-600 bg-slate-100/80 hover:bg-indigo-50 rounded-xl border border-transparent hover:border-indigo-100 transition-all">
-          <svg id="refreshIcon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+
+        <button onclick="fetchAllData()" title="Muat Ulang Data" class="p-2 text-zinc-600 hover:text-zinc-900 bg-white hover:bg-zinc-100 rounded-lg border border-zinc-200 transition-colors">
+          <svg id="refreshIcon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
           </svg>
         </button>
       </div>
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-5">
 
-    <!-- KPI Cards -->
-    <section class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="card-surface p-5 rounded-2xl hover:border-slate-300 transition-all">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-500">Radar Lowongan Aktif</span>
-          <span class="w-8 h-8 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center text-sm">📡</span>
+    <!-- Compact Metric Strip -->
+    <section class="grid grid-cols-2 lg:grid-cols-4 bg-white border border-zinc-200 rounded-xl divide-y lg:divide-y-0 lg:divide-x divide-zinc-200 overflow-hidden">
+      <div class="p-4 sm:px-5">
+        <div class="flex items-center justify-between text-xs font-medium text-zinc-500">
+          <span>Radar Aktif</span>
+          <span id="kpiNewTodayTag" class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">+0 hari ini</span>
         </div>
-        <p id="kpiRadar" class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-3 tracking-tight">0</p>
-        <p class="text-[11px] text-slate-400 mt-1">Di-refresh otomatis tiap 48 jam</p>
+        <p id="kpiRadar" class="text-2xl font-bold text-zinc-900 mt-1.5 tabular-nums tracking-tight">0</p>
+        <p class="text-[11px] text-zinc-400 mt-0.5">Siklus retensi radar 48 jam</p>
       </div>
 
-      <div class="card-surface p-5 rounded-2xl hover:border-indigo-200 transition-all">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-500">Lamaran Saya</span>
-          <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">📨</span>
-        </div>
-        <p id="kpiApplied" class="text-2xl sm:text-3xl font-extrabold text-indigo-600 mt-3 tracking-tight">0</p>
-        <p class="text-[11px] text-slate-400 mt-1">Tersimpan permanen di tracker</p>
+      <div class="p-4 sm:px-5 border-l border-zinc-200 lg:border-l-0">
+        <div class="text-xs font-medium text-zinc-500">Lamaran Terkirim</div>
+        <p id="kpiApplied" class="text-2xl font-bold text-zinc-900 mt-1.5 tabular-nums tracking-tight">0</p>
+        <p class="text-[11px] text-zinc-400 mt-0.5">Tersimpan permanen di tracker</p>
       </div>
 
-      <div class="card-surface p-5 rounded-2xl hover:border-amber-200 transition-all">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-500">Tes & Wawancara</span>
-          <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-sm">🎯</span>
-        </div>
-        <p id="kpiProgress" class="text-2xl sm:text-3xl font-extrabold text-amber-600 mt-3 tracking-tight">0</p>
-        <p class="text-[11px] text-slate-400 mt-1">Tahap seleksi berjalan</p>
+      <div class="p-4 sm:px-5">
+        <div class="text-xs font-medium text-zinc-500">Tes &amp; Wawancara</div>
+        <p id="kpiProgress" class="text-2xl font-bold text-amber-600 mt-1.5 tabular-nums tracking-tight">0</p>
+        <p class="text-[11px] text-zinc-400 mt-0.5">Proses seleksi sedang berjalan</p>
       </div>
 
-      <div class="card-surface p-5 rounded-2xl hover:border-emerald-200 transition-all">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-semibold text-slate-500">Interview Rate</span>
-          <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm">📈</span>
-        </div>
-        <p id="kpiRate" class="text-2xl sm:text-3xl font-extrabold text-emerald-600 mt-3 tracking-tight">0%</p>
-        <p class="text-[11px] text-slate-400 mt-1">Rasio lolos seleksi administrasi</p>
+      <div class="p-4 sm:px-5 border-l border-zinc-200 lg:border-l-0">
+        <div class="text-xs font-medium text-zinc-500">Interview Rate</div>
+        <p id="kpiRate" class="text-2xl font-bold text-emerald-600 mt-1.5 tabular-nums tracking-tight">0%</p>
+        <p class="text-[11px] text-zinc-400 mt-0.5">Rasio lolos seleksi berkas</p>
       </div>
     </section>
 
-    <!-- Main Workspace Container -->
-    <div class="card-surface rounded-2xl overflow-hidden">
+    <!-- Main Workspace -->
+    <div class="surface-card rounded-xl overflow-hidden">
       <!-- Navigation Tabs Header -->
-      <div class="px-4 sm:px-6 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-4 bg-slate-50/60">
-        <nav class="flex space-x-7 -mb-px" aria-label="Tabs">
-          <button id="tabBtnRadar" onclick="switchMainTab('radar')" class="tab-active py-4 px-1 text-sm flex items-center gap-2.5 transition-all">
-            <span>Radar Lowongan Baru</span>
-            <span id="badgeRadar" class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-0.5 rounded-full">0</span>
+      <div class="px-4 sm:px-6 border-b border-zinc-200 flex flex-wrap items-center justify-between gap-4 bg-zinc-50/70">
+        <nav class="flex space-x-6 -mb-px" aria-label="Tabs">
+          <button id="tabBtnRadar" onclick="switchMainTab('radar')" class="tab-active py-3.5 px-1 text-xs sm:text-sm flex items-center gap-2 transition-colors">
+            <span>Radar Lowongan</span>
+            <span id="badgeRadar" class="font-mono-num bg-zinc-900 text-white text-[11px] font-semibold px-2 py-0.5 rounded-md">0</span>
           </button>
-          <button id="tabBtnApplied" onclick="switchMainTab('applied')" class="tab-inactive py-4 px-1 text-sm flex items-center gap-2.5 transition-all">
+          <button id="tabBtnApplied" onclick="switchMainTab('applied')" class="tab-inactive py-3.5 px-1 text-xs sm:text-sm flex items-center gap-2 transition-colors">
             <span>Lamaran Saya</span>
-            <span id="badgeApplied" class="bg-slate-200/80 text-slate-700 text-xs font-bold px-2.5 py-0.5 rounded-full">0</span>
+            <span id="badgeApplied" class="font-mono-num bg-zinc-200 text-zinc-700 text-[11px] font-semibold px-2 py-0.5 rounded-md">0</span>
           </button>
         </nav>
 
-        <button onclick="toggleChartPanel()" class="text-xs font-semibold text-slate-500 hover:text-indigo-600 py-2 px-3 rounded-lg hover:bg-white transition-all flex items-center gap-1.5">
-          <span id="chartToggleText">Tampilkan Grafik Distribusi</span>
-          <span id="chartToggleArrow">▾</span>
+        <button onclick="toggleChartPanel()" class="text-xs font-medium text-zinc-500 hover:text-zinc-900 py-1.5 px-2.5 rounded-md hover:bg-zinc-200/60 transition-colors flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
+          </svg>
+          <span id="chartToggleText">Distribusi Klaster</span>
         </button>
       </div>
 
-      <!-- Collapsible Distribution Chart -->
-      <div id="chartPanel" class="hidden p-6 border-b border-slate-100 bg-slate-50/40">
-        <div class="max-w-3xl mx-auto h-48">
+      <!-- Collapsible Chart Panel -->
+      <div id="chartPanel" class="hidden p-5 border-b border-zinc-200 bg-zinc-50/40">
+        <div class="max-w-3xl mx-auto h-44">
           <canvas id="clusterChart"></canvas>
         </div>
       </div>
 
       <!-- ===================================================================== -->
-      <!-- VIEW 1: RADAR LOWONGAN BARU (BELUM DILAMAR)                           -->
+      <!-- VIEW 1: RADAR LOWONGAN                                                -->
       <!-- ===================================================================== -->
-      <div id="viewRadar" class="p-4 sm:p-6 space-y-5">
-        <!-- Category Pills -->
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div class="flex flex-wrap gap-1.5" id="radarClusterTabs">
-            <button onclick="setRadarCluster('')" class="r-cluster-btn bg-slate-900 text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl transition" data-val="">Semua</button>
-            <button onclick="setRadarCluster('Data/Digital')" class="r-cluster-btn bg-slate-100 text-slate-600 hover:bg-slate-200/80 text-xs font-semibold px-3.5 py-1.5 rounded-xl transition" data-val="Data/Digital">Creative & Social Media</button>
-            <button onclick="setRadarCluster('IT/Tech')" class="r-cluster-btn bg-slate-100 text-slate-600 hover:bg-slate-200/80 text-xs font-semibold px-3.5 py-1.5 rounded-xl transition" data-val="IT/Tech">UI/UX & IT Support</button>
-            <button onclick="setRadarCluster('MT/ODP')" class="r-cluster-btn bg-slate-100 text-slate-600 hover:bg-slate-200/80 text-xs font-semibold px-3.5 py-1.5 rounded-xl transition" data-val="MT/ODP">MT / ODP / FG</button>
-            <button onclick="setRadarCluster('Operations')" class="r-cluster-btn bg-slate-100 text-slate-600 hover:bg-slate-200/80 text-xs font-semibold px-3.5 py-1.5 rounded-xl transition" data-val="Operations">Operations & Admin</button>
-            <button onclick="setRadarCluster('Other')" class="r-cluster-btn bg-slate-100 text-slate-600 hover:bg-slate-200/80 text-xs font-semibold px-3.5 py-1.5 rounded-xl transition" data-val="Other">Umum / Lainnya</button>
+      <div id="viewRadar" class="p-4 sm:p-6 space-y-4">
+
+        <!-- Bar 1: Filter Cepat Waktu Masuk & Opsi Pengurutan (Sort By) -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3.5 border-b border-zinc-100">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mr-1">Waktu Masuk:</span>
+            <div class="inline-flex p-0.5 rounded-lg bg-zinc-100 border border-zinc-200/80" id="intakeFilterGroup">
+              <button onclick="setIntakeFilter('')" data-val="" class="intake-btn px-3 py-1.5 rounded-md text-xs font-semibold bg-white text-zinc-900 shadow-xs transition-all">
+                Semua <span id="countIntakeAll" class="font-mono-num text-[11px] text-zinc-500 ml-1">0</span>
+              </button>
+              <button onclick="setIntakeFilter('today')" data-val="today" class="intake-btn px-3 py-1.5 rounded-md text-xs font-medium text-zinc-600 hover:text-zinc-900 transition-all flex items-center gap-1.5">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                <span>Masuk Hari Ini</span>
+                <span id="countIntakeToday" class="font-mono-num text-[11px] text-emerald-700 font-semibold">0</span>
+              </button>
+              <button onclick="setIntakeFilter('yesterday')" data-val="yesterday" class="intake-btn px-3 py-1.5 rounded-md text-xs font-medium text-zinc-600 hover:text-zinc-900 transition-all">
+                Masuk Kemarin <span id="countIntakeYesterday" class="font-mono-num text-[11px] text-zinc-400 ml-1">0</span>
+              </button>
+            </div>
           </div>
-          <span id="radarCountLabel" class="text-xs font-medium text-slate-400">Memuat data...</span>
+
+          <div class="flex items-center gap-2">
+            <label for="radarSort" class="text-xs font-medium text-zinc-500 whitespace-nowrap">Urutkan:</label>
+            <select id="radarSort" onchange="renderRadarTable()" class="border border-zinc-200 bg-white rounded-lg px-3 py-1.5 text-xs font-semibold text-zinc-800 focus:outline-none focus:border-zinc-900">
+              <option value="intake_desc">Terbaru Masuk Website</option>
+              <option value="priority">Prioritas Malang &amp; Match CV</option>
+              <option value="posted_desc">Terbaru Terbit di Portal</option>
+              <option value="closing_asc">Batas Tutup Terdekat</option>
+            </select>
+          </div>
         </div>
 
-        <!-- Multi-Filter Search Bar -->
-        <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
-          <div class="sm:col-span-4 relative">
-            <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+        <!-- Bar 2: Role Cluster Filter Pills -->
+        <div class="flex flex-wrap items-center justify-between gap-3">
+          <div class="flex flex-wrap gap-1.5" id="radarClusterTabs">
+            <button onclick="setRadarCluster('')" class="r-cluster-btn bg-zinc-900 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors" data-val="">Semua Klaster</button>
+            <button onclick="setRadarCluster('Data/Digital')" class="r-cluster-btn bg-zinc-100 text-zinc-600 hover:bg-zinc-200/70 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors" data-val="Data/Digital">Creative &amp; Social Media</button>
+            <button onclick="setRadarCluster('IT/Tech')" class="r-cluster-btn bg-zinc-100 text-zinc-600 hover:bg-zinc-200/70 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors" data-val="IT/Tech">UI/UX &amp; IT Support</button>
+            <button onclick="setRadarCluster('MT/ODP')" class="r-cluster-btn bg-zinc-100 text-zinc-600 hover:bg-zinc-200/70 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors" data-val="MT/ODP">MT / ODP / FG</button>
+            <button onclick="setRadarCluster('Operations')" class="r-cluster-btn bg-zinc-100 text-zinc-600 hover:bg-zinc-200/70 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors" data-val="Operations">Operations &amp; Admin</button>
+            <button onclick="setRadarCluster('Other')" class="r-cluster-btn bg-zinc-100 text-zinc-600 hover:bg-zinc-200/70 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors" data-val="Other">Lainnya</button>
+          </div>
+          <span id="radarCountLabel" class="text-xs text-zinc-400 tabular-nums">Memuat data...</span>
+        </div>
+
+        <!-- Bar 3: Search & Facets -->
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+          <div class="sm:col-span-5 relative">
+            <svg class="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
-            <input type="text" id="radarSearch" onkeyup="renderRadarTable()" placeholder="Cari posisi, perusahaan, atau skill..."
-                   class="w-full pl-10 pr-3.5 py-2.5 border border-slate-200 bg-slate-50/70 focus:bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500 transition" />
+            <input type="text" id="radarSearch" onkeyup="renderRadarTable()" placeholder="Cari posisi, perusahaan, atau kata kunci..."
+                   class="w-full pl-9 pr-3 py-2 border border-zinc-200 bg-zinc-50/60 focus:bg-white rounded-lg text-xs sm:text-sm focus:outline-none focus:border-zinc-900 transition-colors" />
           </div>
 
-          <select id="radarRegion" onchange="renderRadarTable()" class="sm:col-span-3 border border-indigo-200 bg-indigo-50/40 font-semibold rounded-xl px-3.5 py-2.5 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/25">
-            <option value="">📍 Semua Daerah (Malang Utama)</option>
-            <option value="malang">⭐ Malang Raya</option>
+          <select id="radarRegion" onchange="renderRadarTable()" class="sm:col-span-3 border border-zinc-200 bg-white rounded-lg px-3 py-2 text-xs sm:text-sm font-medium text-zinc-700 focus:outline-none focus:border-zinc-900">
+            <option value="">Semua Daerah</option>
+            <option value="malang">Malang Raya</option>
             <option value="surabaya">Surabaya</option>
             <option value="jatim">Jawa Timur Lainnya</option>
-            <option value="remote">Remote (Kerja dari Malang)</option>
-            <option value="other">Jabodetabek & Daerah Lain</option>
+            <option value="remote">Remote (WFH)</option>
+            <option value="other">Jabodetabek &amp; Luar Jatim</option>
           </select>
 
-          <select id="radarMode" onchange="renderRadarTable()" class="sm:col-span-2 border border-slate-200 bg-slate-50/70 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-500">
-            <option value="">Semua Mode</option>
+          <select id="radarMode" onchange="renderRadarTable()" class="sm:col-span-2 border border-zinc-200 bg-white rounded-lg px-3 py-2 text-xs sm:text-sm text-zinc-700 focus:outline-none focus:border-zinc-900">
+            <option value="">Semua Sistem</option>
             <option value="Onsite">Onsite</option>
             <option value="Hybrid">Hybrid</option>
             <option value="Remote">Remote</option>
           </select>
 
-          <select id="radarSource" onchange="renderRadarTable()" class="sm:col-span-3 border border-slate-200 bg-slate-50/70 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-500">
-            <option value="">Semua Sumber Portal</option>
+          <select id="radarSource" onchange="renderRadarTable()" class="sm:col-span-2 border border-zinc-200 bg-white rounded-lg px-3 py-2 text-xs sm:text-sm text-zinc-700 focus:outline-none focus:border-zinc-900">
+            <option value="">Semua Portal</option>
             <option value="JobStreet">JobStreet</option>
             <option value="Kalibrr">Kalibrr</option>
             <option value="LinkedIn">LinkedIn</option>
             <option value="Indeed">Indeed</option>
-            <option value="Manual">Input Manual</option>
+            <option value="Manual">Manual</option>
           </select>
         </div>
 
         <!-- Radar Data Table -->
-        <div class="overflow-x-auto border border-slate-200/80 rounded-2xl">
+        <div class="overflow-x-auto border border-zinc-200 rounded-xl">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="bg-slate-50/90 text-slate-500 text-[11px] font-bold uppercase tracking-wider border-b border-slate-200/80">
-                <th class="py-3.5 px-4">Posisi, Perusahaan & Waktu</th>
-                <th class="py-3.5 px-4">Klaster</th>
-                <th class="py-3.5 px-4">Lokasi & Sistem</th>
-                <th class="py-3.5 px-4">Portal</th>
-                <th class="py-3.5 px-4 text-right">Aksi</th>
+              <tr class="bg-zinc-50 text-zinc-500 text-[11px] font-semibold uppercase tracking-wider border-b border-zinc-200">
+                <th class="py-3 px-4">Posisi &amp; Riwayat Waktu</th>
+                <th class="py-3 px-4">Klaster</th>
+                <th class="py-3 px-4">Lokasi &amp; Sistem</th>
+                <th class="py-3 px-4">Sumber</th>
+                <th class="py-3 px-4 text-right">Tindakan</th>
               </tr>
             </thead>
-            <tbody id="radarTableBody" class="divide-y divide-slate-100 text-sm bg-white"></tbody>
+            <tbody id="radarTableBody" class="divide-y divide-zinc-200/80 text-sm bg-white"></tbody>
           </table>
         </div>
       </div>
 
       <!-- ===================================================================== -->
-      <!-- VIEW 2: LAMARAN SAYA (PERSONAL ATS & CATATAN PERMANEN)                -->
+      <!-- VIEW 2: LAMARAN SAYA (APPLICATION TRACKER)                            -->
       <!-- ===================================================================== -->
-      <div id="viewApplied" class="hidden p-4 sm:p-6 space-y-5">
+      <div id="viewApplied" class="hidden p-4 sm:p-6 space-y-4">
         <div class="flex flex-wrap items-center justify-between gap-3">
           <div class="flex flex-wrap gap-1.5" id="stageFilterTabs">
-            <button onclick="setStageFilter('')" class="stage-btn bg-indigo-600 text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl transition" data-val="">Semua Lamaran</button>
-            <button onclick="setStageFilter('Applied')" class="stage-btn bg-slate-100 text-slate-600 hover:bg-slate-200/80 text-xs font-semibold px-3.5 py-1.5 rounded-xl transition" data-val="Applied">Applied</button>
-            <button onclick="setStageFilter('Online Test')" class="stage-btn bg-slate-100 text-slate-600 hover:bg-slate-200/80 text-xs font-semibold px-3.5 py-1.5 rounded-xl transition" data-val="Online Test">Online Test</button>
-            <button onclick="setStageFilter('HR Interview')" class="stage-btn bg-slate-100 text-slate-600 hover:bg-slate-200/80 text-xs font-semibold px-3.5 py-1.5 rounded-xl transition" data-val="HR Interview">HR Interview</button>
-            <button onclick="setStageFilter('User Interview')" class="stage-btn bg-slate-100 text-slate-600 hover:bg-slate-200/80 text-xs font-semibold px-3.5 py-1.5 rounded-xl transition" data-val="User Interview">User Interview</button>
-            <button onclick="setStageFilter('Offer')" class="stage-btn bg-slate-100 text-slate-600 hover:bg-slate-200/80 text-xs font-semibold px-3.5 py-1.5 rounded-xl transition" data-val="Offer">Offer 🎉</button>
-            <button onclick="setStageFilter('Rejected')" class="stage-btn bg-slate-100 text-slate-600 hover:bg-slate-200/80 text-xs font-semibold px-3.5 py-1.5 rounded-xl transition" data-val="Rejected">Rejected</button>
+            <button onclick="setStageFilter('')" class="stage-btn bg-zinc-900 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors" data-val="">Semua</button>
+            <button onclick="setStageFilter('Applied')" class="stage-btn bg-zinc-100 text-zinc-600 hover:bg-zinc-200/70 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors" data-val="Applied">Applied</button>
+            <button onclick="setStageFilter('Online Test')" class="stage-btn bg-zinc-100 text-zinc-600 hover:bg-zinc-200/70 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors" data-val="Online Test">Online Test</button>
+            <button onclick="setStageFilter('HR Interview')" class="stage-btn bg-zinc-100 text-zinc-600 hover:bg-zinc-200/70 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors" data-val="HR Interview">HR Interview</button>
+            <button onclick="setStageFilter('User Interview')" class="stage-btn bg-zinc-100 text-zinc-600 hover:bg-zinc-200/70 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors" data-val="User Interview">User Interview</button>
+            <button onclick="setStageFilter('Offer')" class="stage-btn bg-zinc-100 text-zinc-600 hover:bg-zinc-200/70 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors" data-val="Offer">Offer</button>
+            <button onclick="setStageFilter('Rejected')" class="stage-btn bg-zinc-100 text-zinc-600 hover:bg-zinc-200/70 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors" data-val="Rejected">Rejected</button>
           </div>
-          <span id="appliedCountLabel" class="text-xs font-medium text-slate-400">0 lamaran tercatat</span>
+          <span id="appliedCountLabel" class="text-xs text-zinc-400 tabular-nums">0 lamaran tercatat</span>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
           <div class="sm:col-span-2 relative">
-            <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
+            <svg class="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
-            <input type="text" id="appliedSearch" onkeyup="renderAppliedTable()" placeholder="Cari perusahaan, posisi, versi CV, atau catatan interview..."
-                   class="w-full pl-10 pr-3.5 py-2.5 border border-slate-200 bg-slate-50/70 focus:bg-white rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/25 focus:border-indigo-500 transition" />
+            <input type="text" id="appliedSearch" onkeyup="renderAppliedTable()" placeholder="Cari perusahaan, posisi, versi CV, atau catatan..."
+                   class="w-full pl-9 pr-3 py-2 border border-zinc-200 bg-zinc-50/60 focus:bg-white rounded-lg text-xs sm:text-sm focus:outline-none focus:border-zinc-900 transition-colors" />
           </div>
-          <select id="appliedCluster" onchange="renderAppliedTable()" class="border border-slate-200 bg-slate-50/70 rounded-xl px-3.5 py-2.5 text-sm text-slate-700 focus:outline-none focus:border-indigo-500">
+          <select id="appliedCluster" onchange="renderAppliedTable()" class="border border-zinc-200 bg-white rounded-lg px-3 py-2 text-xs sm:text-sm text-zinc-700 focus:outline-none focus:border-zinc-900">
             <option value="">Semua Klaster Posisi</option>
-            <option value="Data/Digital">Creative & Social Media</option>
-            <option value="IT/Tech">UI/UX & IT Support</option>
+            <option value="Data/Digital">Creative &amp; Social Media</option>
+            <option value="IT/Tech">UI/UX &amp; IT Support</option>
             <option value="MT/ODP">MT / ODP / FG</option>
-            <option value="Operations">Operations & Admin</option>
-            <option value="Other">Umum / Lainnya</option>
+            <option value="Operations">Operations &amp; Admin</option>
+            <option value="Other">Lainnya</option>
           </select>
         </div>
 
-        <div class="overflow-x-auto border border-slate-200/80 rounded-2xl">
+        <div class="overflow-x-auto border border-zinc-200 rounded-xl">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="bg-slate-50/90 text-slate-500 text-[11px] font-bold uppercase tracking-wider border-b border-slate-200/80">
-                <th class="py-3.5 px-4">Posisi & Perusahaan</th>
-                <th class="py-3.5 px-4">Status & Tgl Lamar</th>
-                <th class="py-3.5 px-4">Versi CV</th>
-                <th class="py-3.5 px-4">Jadwal & Catatan</th>
-                <th class="py-3.5 px-4 text-right">Kelola</th>
+              <tr class="bg-zinc-50 text-zinc-500 text-[11px] font-semibold uppercase tracking-wider border-b border-zinc-200">
+                <th class="py-3 px-4">Posisi &amp; Perusahaan</th>
+                <th class="py-3 px-4">Tahap &amp; Tanggal Lamar</th>
+                <th class="py-3 px-4">Versi CV</th>
+                <th class="py-3 px-4">Jadwal &amp; Catatan</th>
+                <th class="py-3 px-4 text-right">Kelola</th>
               </tr>
             </thead>
-            <tbody id="appliedTableBody" class="divide-y divide-slate-100 text-sm bg-white"></tbody>
+            <tbody id="appliedTableBody" class="divide-y divide-zinc-200/80 text-sm bg-white"></tbody>
           </table>
         </div>
       </div>
@@ -267,52 +304,56 @@
   <!-- ======================================================================= -->
   <!-- MODAL 1: TAMBAH LOWONGAN / LAMARAN MANUAL                               -->
   <!-- ======================================================================= -->
-  <div id="addModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-100 max-h-[92vh] overflow-y-auto">
-      <div class="flex justify-between items-start border-b border-slate-100 pb-3.5">
+  <div id="addModal" class="hidden fixed inset-0 bg-zinc-950/40 backdrop-blur-[2px] z-30 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-lg w-full p-5 sm:p-6 space-y-4 border border-zinc-200 shadow-xl max-h-[92vh] overflow-y-auto">
+      <div class="flex justify-between items-start border-b border-zinc-100 pb-3">
         <div>
-          <h3 class="font-bold text-slate-900 text-base">Catat Lowongan / Lamaran Baru</h3>
-          <p class="text-xs text-slate-500 mt-0.5">Simpan lamaran eksternal (IG, Karir Web, JobStreet) ke database Anda</p>
+          <h3 class="font-bold text-zinc-900 text-base">Catat Lowongan / Lamaran Baru</h3>
+          <p class="text-xs text-zinc-500 mt-0.5">Simpan lamaran eksternal dari portal atau media sosial ke workspace</p>
         </div>
-        <button onclick="closeAddModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 text-xl leading-none">&times;</button>
+        <button onclick="closeAddModal()" class="text-zinc-400 hover:text-zinc-800 p-1 rounded-md hover:bg-zinc-100 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
-      <div class="space-y-3.5 text-sm">
+      <div class="space-y-3 text-sm">
         <div>
-          <label class="block text-xs font-bold text-slate-700 mb-1.5">Tujuan Penyimpanan</label>
-          <select id="inInitialStatus" onchange="toggleManualAppFields()" class="w-full border border-indigo-200 bg-indigo-50/60 text-indigo-950 font-semibold rounded-xl px-3.5 py-2.5 focus:outline-none">
-            <option value="Applied">Langsung ke "Lamaran Saya" (Status: Applied)</option>
-            <option value="Online Test">Langsung ke "Lamaran Saya" (Status: Online Test)</option>
-            <option value="HR Interview">Langsung ke "Lamaran Saya" (Status: HR Interview)</option>
-            <option value="Wishlist">Simpan ke "Radar Lowongan" (Belum Dilamar)</option>
+          <label class="block text-xs font-semibold text-zinc-700 mb-1">Tujuan Penyimpanan</label>
+          <select id="inInitialStatus" onchange="toggleManualAppFields()" class="w-full border border-zinc-300 bg-zinc-50 text-zinc-900 font-semibold rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900">
+            <option value="Applied">Lamaran Saya — Status: Applied</option>
+            <option value="Online Test">Lamaran Saya — Status: Online Test</option>
+            <option value="HR Interview">Lamaran Saya — Status: HR Interview</option>
+            <option value="Wishlist">Radar Lowongan — Belum Dilamar</option>
           </select>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Judul Posisi *</label>
-            <input type="text" id="inTitle" placeholder="Contoh: Social Media Specialist" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+            <label class="block text-xs font-medium text-zinc-600 mb-1">Judul Posisi *</label>
+            <input type="text" id="inTitle" placeholder="Social Media Specialist" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Perusahaan *</label>
-            <input type="text" id="inCompany" placeholder="Contoh: PT Paragon / Bank BCA" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+            <label class="block text-xs font-medium text-zinc-600 mb-1">Perusahaan *</label>
+            <input type="text" id="inCompany" placeholder="PT Paragon / Bank BCA" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900" />
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Klaster Posisi</label>
-            <select id="inCluster" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 bg-white focus:outline-none focus:border-indigo-500">
-              <option value="Data/Digital">Creative & Social Media</option>
-              <option value="IT/Tech">UI/UX & IT Support</option>
+            <label class="block text-xs font-medium text-zinc-600 mb-1">Klaster Posisi</label>
+            <select id="inCluster" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm bg-white focus:outline-none focus:border-zinc-900">
+              <option value="Data/Digital">Creative &amp; Social Media</option>
+              <option value="IT/Tech">UI/UX &amp; IT Support</option>
               <option value="MT/ODP">MT / ODP / FG</option>
-              <option value="Operations">Operations & Admin</option>
-              <option value="Other">Umum / Lainnya</option>
+              <option value="Operations">Operations &amp; Admin</option>
+              <option value="Other">Lainnya</option>
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Sistem Kerja</label>
-            <select id="inMode" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 bg-white focus:outline-none focus:border-indigo-500">
+            <label class="block text-xs font-medium text-zinc-600 mb-1">Sistem Kerja</label>
+            <select id="inMode" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm bg-white focus:outline-none focus:border-zinc-900">
               <option value="Onsite">Onsite</option>
               <option value="Hybrid">Hybrid</option>
               <option value="Remote">Remote</option>
@@ -322,47 +363,47 @@
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Lokasi</label>
-            <input type="text" id="inLocation" value="Malang, East Java" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+            <label class="block text-xs font-medium text-zinc-600 mb-1">Lokasi</label>
+            <input type="text" id="inLocation" value="Malang, East Java" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Batas Akhir Lowongan (Opsional)</label>
-            <input type="date" id="inClosingDate" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+            <label class="block text-xs font-medium text-zinc-600 mb-1">Batas Akhir (Opsional)</label>
+            <input type="date" id="inClosingDate" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900" />
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Sumber Info</label>
-            <input type="text" id="inSource" placeholder="JobStreet / Instagram / Web" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+            <label class="block text-xs font-medium text-zinc-600 mb-1">Sumber Portal</label>
+            <input type="text" id="inSource" placeholder="JobStreet / Instagram / Web" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Link Lowongan *</label>
-            <input type="url" id="inUrl" placeholder="https://..." class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+            <label class="block text-xs font-medium text-zinc-600 mb-1">Tautan Lowongan *</label>
+            <input type="url" id="inUrl" placeholder="https://..." class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900" />
           </div>
         </div>
 
-        <div id="manualAppFields" class="space-y-3 pt-2.5 border-t border-slate-100">
+        <div id="manualAppFields" class="space-y-3 pt-2.5 border-t border-zinc-100">
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Lamar</label>
-              <input type="date" id="inAppliedDate" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+              <label class="block text-xs font-medium text-zinc-600 mb-1">Tanggal Lamar</label>
+              <input type="date" id="inAppliedDate" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-600 mb-1">Versi CV</label>
-              <input type="text" id="inCvVersion" placeholder="CV_Bagas_Creative_v2.pdf" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+              <label class="block text-xs font-medium text-zinc-600 mb-1">Versi CV</label>
+              <input type="text" id="inCvVersion" placeholder="CV_Bagas_Creative_v2.pdf" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900" />
             </div>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Catatan Awal</label>
-            <textarea id="inNotes" rows="2" placeholder="Email HRD, akun portal yang dipakai, portofolio yang dilampirkan..." class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500"></textarea>
+            <label class="block text-xs font-medium text-zinc-600 mb-1">Catatan Awal</label>
+            <textarea id="inNotes" rows="2" placeholder="Kontak HR, akun yang dipakai, atau portofolio terlampir..." class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900"></textarea>
           </div>
         </div>
       </div>
 
-      <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeAddModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">Batal</button>
-        <button id="btnSaveManual" onclick="saveManualJob()" class="px-4 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm transition">Simpan Data</button>
+      <div class="flex justify-end gap-2 pt-2 border-t border-zinc-100">
+        <button onclick="closeAddModal()" class="px-3.5 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors">Batal</button>
+        <button id="btnSaveManual" onclick="saveManualJob()" class="px-4 py-2 text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg transition-colors">Simpan Data</button>
       </div>
     </div>
   </div>
@@ -370,86 +411,93 @@
   <!-- ======================================================================= -->
   <!-- MODAL 2: EDIT PROGRES & CATATAN LAMARAN                                 -->
   <!-- ======================================================================= -->
-  <div id="trackModal" class="hidden fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-2xl border border-slate-100 max-h-[92vh] overflow-y-auto">
-      <div class="flex justify-between items-start border-b border-slate-100 pb-3.5">
+  <div id="trackModal" class="hidden fixed inset-0 bg-zinc-950/40 backdrop-blur-[2px] z-30 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-lg w-full p-5 sm:p-6 space-y-4 border border-zinc-200 shadow-xl max-h-[92vh] overflow-y-auto">
+      <div class="flex justify-between items-start border-b border-zinc-100 pb-3">
         <div>
-          <h3 class="font-bold text-slate-900 text-base">Edit Detail & Progres Lamaran</h3>
-          <p id="trackJobHeader" class="text-xs font-semibold text-indigo-600 mt-0.5"></p>
+          <h3 class="font-bold text-zinc-900 text-base">Perbarui Progres Lamaran</h3>
+          <p id="trackJobHeader" class="text-xs font-medium text-zinc-500 mt-0.5"></p>
         </div>
-        <button onclick="closeTrackModal()" class="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 text-xl leading-none">&times;</button>
+        <button onclick="closeTrackModal()" class="text-zinc-400 hover:text-zinc-800 p-1 rounded-md hover:bg-zinc-100 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
       </div>
 
       <input type="hidden" id="trackJobId" />
 
-      <div class="space-y-3.5 text-sm">
+      <div class="space-y-3 text-sm">
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Tahapan Seleksi</label>
-            <select id="trackStatus" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 bg-white font-semibold text-slate-800 focus:outline-none focus:border-indigo-500">
+            <label class="block text-xs font-medium text-zinc-600 mb-1">Tahap Seleksi</label>
+            <select id="trackStatus" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm bg-white font-semibold text-zinc-900 focus:outline-none focus:border-zinc-900">
               <option value="Applied">Applied</option>
               <option value="Online Test">Online Test</option>
               <option value="HR Interview">HR Interview</option>
               <option value="User Interview">User Interview</option>
-              <option value="Offer">Offer 🎉</option>
+              <option value="Offer">Offer</option>
               <option value="Rejected">Rejected</option>
-              <option value="Wishlist">Kembalikan ke Radar (Wishlist)</option>
+              <option value="Wishlist">Kembalikan ke Radar</option>
             </select>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Melamar</label>
-            <input type="date" id="trackAppliedDate" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+            <label class="block text-xs font-medium text-zinc-600 mb-1">Tanggal Melamar</label>
+            <input type="date" id="trackAppliedDate" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900" />
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Posisi</label>
-            <input type="text" id="trackEditTitle" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+            <label class="block text-xs font-medium text-zinc-600 mb-1">Posisi</label>
+            <input type="text" id="trackEditTitle" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Perusahaan</label>
-            <input type="text" id="trackEditCompany" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+            <label class="block text-xs font-medium text-zinc-600 mb-1">Perusahaan</label>
+            <input type="text" id="trackEditCompany" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900" />
           </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Versi CV / Portofolio</label>
-            <input type="text" id="trackCvVersion" placeholder="CV_Bagas_UIUX_v2.pdf" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+            <label class="block text-xs font-medium text-zinc-600 mb-1">Versi CV / Portofolio</label>
+            <input type="text" id="trackCvVersion" placeholder="CV_Bagas_UIUX_v2.pdf" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900" />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Batas Akhir Lowongan</label>
-            <input type="date" id="trackClosingDate" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+            <label class="block text-xs font-medium text-zinc-600 mb-1">Batas Akhir Lowongan</label>
+            <input type="date" id="trackClosingDate" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900" />
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Jadwal Tes / Wawancara Berikutnya</label>
-          <input type="datetime-local" id="trackSchedule" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" />
+          <label class="block text-xs font-medium text-zinc-600 mb-1">Jadwal Tes / Wawancara Berikutnya</label>
+          <input type="datetime-local" id="trackSchedule" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900" />
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Catatan Lengkap (Link Zoom, Kontak HR, Kisaran Gaji, Hasil)</label>
-          <textarea id="trackNotes" rows="3" class="w-full border border-slate-200 rounded-xl px-3.5 py-2 focus:outline-none focus:border-indigo-500" placeholder="Catat detail seleksi, nama rekruter, atau poin evaluasi wawancara..."></textarea>
+          <label class="block text-xs font-medium text-zinc-600 mb-1">Catatan Lengkap</label>
+          <textarea id="trackNotes" rows="3" class="w-full border border-zinc-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:border-zinc-900" placeholder="Link meeting, kontak rekruter, kisaran gaji, atau evaluasi tahap seleksi..."></textarea>
         </div>
       </div>
 
-      <div class="flex flex-wrap justify-between items-center gap-2 pt-3 border-t border-slate-100">
-        <a id="btnAddGCal" href="#" target="_blank" class="hidden inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200/80 px-3 py-2 rounded-xl transition">
-          <span>📅 Simpan ke Google Calendar</span>
+      <div class="flex flex-wrap justify-between items-center gap-2 pt-3 border-t border-zinc-100">
+        <a id="btnAddGCal" href="#" target="_blank" class="hidden inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 bg-amber-50 hover:bg-amber-100 border border-amber-200 px-3 py-1.5 rounded-lg transition-colors">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+          </svg>
+          <span>Tambah ke Google Calendar</span>
         </a>
         <div class="flex gap-2 ml-auto">
-          <button onclick="closeTrackModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition">Batal</button>
-          <button id="btnSaveProgress" onclick="saveProgress()" class="px-4 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-sm transition">Simpan Perubahan</button>
+          <button onclick="closeTrackModal()" class="px-3.5 py-2 text-xs font-medium text-zinc-600 hover:bg-zinc-100 rounded-lg transition-colors">Batal</button>
+          <button id="btnSaveProgress" onclick="saveProgress()" class="px-4 py-2 text-xs font-semibold bg-zinc-900 hover:bg-zinc-800 text-white rounded-lg transition-colors">Simpan Perubahan</button>
         </div>
       </div>
     </div>
   </div>
 
   <!-- Toast Notification -->
-  <div id="toast" class="hidden fixed bottom-5 right-5 z-40 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-xl border border-slate-700/60 flex items-center gap-2.5 transition-all">
-    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+  <div id="toast" class="hidden fixed bottom-5 right-5 z-40 bg-zinc-900 text-white text-xs font-medium px-4 py-2.5 rounded-lg shadow-lg border border-zinc-700 flex items-center gap-2">
+    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
     <span id="toastMsg">Tersimpan</span>
   </div>
 
@@ -460,6 +508,7 @@
     let sb = null;
     let allRecords = [];
     let activeMainTab = "radar";
+    let intakeFilter = "";
     let radarClusterFilter = "";
     let stageFilter = "";
     let clusterChartInstance = null;
@@ -475,7 +524,7 @@
       document.getElementById("toastMsg").innerText = msg;
       el.classList.remove("hidden");
       clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => el.classList.add("hidden"), 3500);
+      window._toastTimer = setTimeout(() => el.classList.add("hidden"), 3200);
     }
 
     async function fetchAllData() {
@@ -493,7 +542,7 @@
         `)
         .order("created_at", { ascending: false });
 
-      if (icon) setTimeout(() => icon.classList.remove("animate-spin"), 400);
+      if (icon) setTimeout(() => icon.classList.remove("animate-spin"), 350);
 
       if (error) {
         alert("Gagal memuat data: " + error.message);
@@ -514,6 +563,7 @@
       });
 
       updateKPIs();
+      updateIntakeCounts();
       renderRadarTable();
       renderAppliedTable();
       if (!document.getElementById("chartPanel").classList.contains("hidden")) {
@@ -523,6 +573,72 @@
 
     function isAppliedRecord(r) {
       return r.app_status && r.app_status !== "Wishlist";
+    }
+
+    // =========================================================================
+    // HELPER WAKTU MASUK DASHBOARD (ZONA WIB / ASIA/JAKARTA)
+    // =========================================================================
+    function getWibDayDiff(isoStr) {
+      if (!isoStr) return 999;
+      const dt = new Date(isoStr);
+      if (isNaN(dt.getTime())) return 999;
+
+      const fmtDate = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Jakarta",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+      });
+
+      const todayStr = fmtDate.format(new Date());
+      const targetStr = fmtDate.format(dt);
+
+      const todayUtc = Date.parse(todayStr + "T00:00:00Z");
+      const targetUtc = Date.parse(targetStr + "T00:00:00Z");
+      return Math.round((todayUtc - targetUtc) / (1000 * 60 * 60 * 24));
+    }
+
+    function isNewIntake(createdStr) {
+      if (!createdStr) return false;
+      const dt = new Date(createdStr);
+      if (isNaN(dt.getTime())) return false;
+      const diffHours = (Date.now() - dt.getTime()) / (1000 * 60 * 60);
+      return diffHours <= 24;
+    }
+
+    function formatIntakeTimestamp(createdStr) {
+      if (!createdStr) return "";
+      const dt = new Date(createdStr);
+      if (isNaN(dt.getTime())) return "";
+
+      const dayDiff = getWibDayDiff(createdStr);
+      const timeRaw = new Intl.DateTimeFormat("id-ID", {
+        timeZone: "Asia/Jakarta",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).format(dt).replace(".", ":");
+
+      if (dayDiff === 0) return `Hari ini, ${timeRaw} WIB`;
+      if (dayDiff === 1) return `Kemarin, ${timeRaw} WIB`;
+
+      const datePart = new Intl.DateTimeFormat("id-ID", {
+        timeZone: "Asia/Jakarta",
+        day: "numeric",
+        month: "short"
+      }).format(dt);
+      return `${datePart}, ${timeRaw} WIB`;
+    }
+
+    function updateIntakeCounts() {
+      const radarList = allRecords.filter(r => !isAppliedRecord(r));
+      const todayCount = radarList.filter(r => getWibDayDiff(r.created_at) === 0).length;
+      const yesterdayCount = radarList.filter(r => getWibDayDiff(r.created_at) === 1).length;
+
+      document.getElementById("countIntakeAll").innerText = radarList.length;
+      document.getElementById("countIntakeToday").innerText = todayCount;
+      document.getElementById("countIntakeYesterday").innerText = yesterdayCount;
+      document.getElementById("kpiNewTodayTag").innerText = `+${todayCount} hari ini`;
     }
 
     function updateKPIs() {
@@ -542,26 +658,20 @@
     }
 
     // =========================================================================
-    // HELPER WAKTU POSTING & BATAS TUTUP LOWONGAN
+    // HELPER WAKTU TERBIT PORTAL & BATAS TUTUP
     // =========================================================================
-    function formatPostedBadge(postedStr, createdStr) {
-      const raw = postedStr || createdStr;
-      if (!raw) return "";
-      const dt = new Date(raw);
+    function formatPostedText(postedStr) {
+      if (!postedStr) return "";
+      const dt = new Date(postedStr);
       if (isNaN(dt.getTime())) return "";
 
-      const now = new Date();
-      const diffMs = now - dt;
-      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      const dayDiff = getWibDayDiff(postedStr);
+      if (dayDiff <= 0) return "Terbit portal: Hari ini";
+      if (dayDiff === 1) return "Terbit portal: Kemarin";
+      if (dayDiff < 14) return `Terbit portal: ${dayDiff} hari lalu`;
 
-      let label = dt.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
-      if (diffHours < 1) label = "Baru saja";
-      else if (diffHours < 24 && dt.getDate() === now.getDate()) label = `${diffHours} jam lalu`;
-      else if (diffDays <= 1) label = "Kemarin";
-      else if (diffDays < 7) label = `${diffDays} hari lalu`;
-
-      return `<span class="inline-flex items-center gap-1 text-[11px] text-slate-500">🕒 Terbit: ${esc(label)}</span>`;
+      const dateLabel = dt.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+      return `Terbit portal: ${dateLabel}`;
     }
 
     function formatClosingBadge(closingStr) {
@@ -578,15 +688,15 @@
       const dateText = end.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 
       if (diffDays < 0) {
-        return `<span class="inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200/80">⚠️ Ditutup (${dateText})</span>`;
+        return `<span class="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">Ditutup (${dateText})</span>`;
       }
       if (diffDays === 0) {
-        return `<span class="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 border border-rose-200/80">⏳ Tutup Hari Ini!</span>`;
+        return `<span class="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded bg-rose-50 text-rose-700 border border-rose-200">Tutup Hari Ini</span>`;
       }
       if (diffDays <= 3) {
-        return `<span class="inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 border border-amber-200/80">⏳ Tutup ${diffDays} hari lagi (${dateText})</span>`;
+        return `<span class="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">Tutup ${diffDays} hari lagi (${dateText})</span>`;
       }
-      return `<span class="inline-flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">📅 Tutup: ${dateText}</span>`;
+      return `<span class="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded bg-zinc-100 text-zinc-600 border border-zinc-200/80">Tutup: ${dateText}</span>`;
     }
 
     // =========================================================================
@@ -630,11 +740,11 @@
     function getSourceBadge(sourceRaw) {
       const s = String(sourceRaw || "Portal");
       const low = s.toLowerCase();
-      if (low.includes("linkedin")) return `<span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-sky-50 text-sky-700 border border-sky-200/70">LinkedIn</span>`;
-      if (low.includes("jobstreet")) return `<span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200/70">JobStreet</span>`;
-      if (low.includes("kalibrr")) return `<span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-blue-50 text-blue-700 border border-blue-200/70">Kalibrr</span>`;
-      if (low.includes("indeed")) return `<span class="text-xs font-semibold px-2.5 py-0.5 rounded-md bg-violet-50 text-violet-700 border border-violet-200/70">Indeed</span>`;
-      return `<span class="text-xs font-medium px-2.5 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/70">${esc(s)}</span>`;
+      if (low.includes("linkedin")) return `<span class="text-xs font-medium px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200/80">LinkedIn</span>`;
+      if (low.includes("jobstreet")) return `<span class="text-xs font-medium px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200/80">JobStreet</span>`;
+      if (low.includes("kalibrr")) return `<span class="text-xs font-medium px-2 py-0.5 rounded bg-blue-50 text-blue-700 border border-blue-200/80">Kalibrr</span>`;
+      if (low.includes("indeed")) return `<span class="text-xs font-medium px-2 py-0.5 rounded bg-violet-50 text-violet-700 border border-violet-200/80">Indeed</span>`;
+      return `<span class="text-xs font-medium px-2 py-0.5 rounded bg-zinc-100 text-zinc-600 border border-zinc-200">${esc(s)}</span>`;
     }
 
     function switchMainTab(tab) {
@@ -645,13 +755,13 @@
       const viewApplied = document.getElementById("viewApplied");
 
       if (tab === "radar") {
-        btnRadar.className = "tab-active py-4 px-1 text-sm flex items-center gap-2.5 transition-all";
-        btnApplied.className = "tab-inactive py-4 px-1 text-sm flex items-center gap-2.5 transition-all";
+        btnRadar.className = "tab-active py-3.5 px-1 text-xs sm:text-sm flex items-center gap-2 transition-colors";
+        btnApplied.className = "tab-inactive py-3.5 px-1 text-xs sm:text-sm flex items-center gap-2 transition-colors";
         viewRadar.classList.remove("hidden");
         viewApplied.classList.add("hidden");
       } else {
-        btnApplied.className = "tab-active py-4 px-1 text-sm flex items-center gap-2.5 transition-all";
-        btnRadar.className = "tab-inactive py-4 px-1 text-sm flex items-center gap-2.5 transition-all";
+        btnApplied.className = "tab-active py-3.5 px-1 text-xs sm:text-sm flex items-center gap-2 transition-colors";
+        btnRadar.className = "tab-inactive py-3.5 px-1 text-xs sm:text-sm flex items-center gap-2 transition-colors";
         viewApplied.classList.remove("hidden");
         viewRadar.classList.add("hidden");
       }
@@ -660,21 +770,18 @@
     function toggleChartPanel() {
       const panel = document.getElementById("chartPanel");
       const txt = document.getElementById("chartToggleText");
-      const arrow = document.getElementById("chartToggleArrow");
       panel.classList.toggle("hidden");
       if (!panel.classList.contains("hidden")) {
         txt.innerText = "Sembunyikan Grafik";
-        arrow.innerText = "▴";
         renderClusterChart();
       } else {
-        txt.innerText = "Tampilkan Grafik Distribusi";
-        arrow.innerText = "▾";
+        txt.innerText = "Distribusi Klaster";
       }
     }
 
     function renderClusterChart() {
       const clusters = ["Data/Digital", "IT/Tech", "MT/ODP", "Operations", "Other"];
-      const labels = ["Creative & SocMed", "UI/UX & IT Support", "MT / ODP / FG", "Operations & Admin", "Umum"];
+      const labels = ["Creative & SocMed", "UI/UX & IT Support", "MT / ODP / FG", "Operations & Admin", "Lainnya"];
       const radarCounts = clusters.map(c => allRecords.filter(r => !isAppliedRecord(r) && r.role_cluster === c).length);
       const appliedCounts = clusters.map(c => allRecords.filter(r => isAppliedRecord(r) && r.role_cluster === c).length);
 
@@ -686,14 +793,14 @@
         data: {
           labels,
           datasets: [
-            { label: "Radar Lowongan", data: radarCounts, backgroundColor: "#CBD5E1", borderRadius: 6 },
-            { label: "Lamaran Saya", data: appliedCounts, backgroundColor: "#4F46E5", borderRadius: 6 }
+            { label: "Radar Lowongan", data: radarCounts, backgroundColor: "#D4D4D8", borderRadius: 4 },
+            { label: "Lamaran Saya", data: appliedCounts, backgroundColor: "#18181B", borderRadius: 4 }
           ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { position: "bottom", labels: { boxWidth: 12, font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" } } } },
+          plugins: { legend: { position: "bottom", labels: { boxWidth: 10, font: { size: 11, family: "'Plus Jakarta Sans', sans-serif" } } } },
           scales: {
             y: { beginAtZero: true, ticks: { stepSize: 1 } },
             x: { grid: { display: false } }
@@ -703,14 +810,27 @@
     }
 
     // =========================================================================
-    // VIEW 1: RADAR LOWONGAN BARU
+    // VIEW 1: RADAR LOWONGAN (FILTER WAKTU MASUK & SORTING)
     // =========================================================================
+    function setIntakeFilter(val) {
+      intakeFilter = val;
+      document.querySelectorAll(".intake-btn").forEach(btn => {
+        const isSelected = btn.getAttribute("data-val") === val;
+        if (isSelected) {
+          btn.className = "intake-btn px-3 py-1.5 rounded-md text-xs font-semibold bg-white text-zinc-900 shadow-xs transition-all flex items-center gap-1.5";
+        } else {
+          btn.className = "intake-btn px-3 py-1.5 rounded-md text-xs font-medium text-zinc-600 hover:text-zinc-900 transition-all flex items-center gap-1.5";
+        }
+      });
+      renderRadarTable();
+    }
+
     function setRadarCluster(val) {
       radarClusterFilter = val;
       document.querySelectorAll(".r-cluster-btn").forEach(btn => {
         btn.className = btn.getAttribute("data-val") === val
-          ? "r-cluster-btn bg-slate-900 text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl transition"
-          : "r-cluster-btn bg-slate-100 text-slate-600 hover:bg-slate-200/80 text-xs font-semibold px-3.5 py-1.5 rounded-xl transition";
+          ? "r-cluster-btn bg-zinc-900 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+          : "r-cluster-btn bg-zinc-100 text-zinc-600 hover:bg-zinc-200/70 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors";
       });
       renderRadarTable();
     }
@@ -720,11 +840,17 @@
       const region = document.getElementById("radarRegion").value;
       const mode = document.getElementById("radarMode").value;
       const source = document.getElementById("radarSource").value;
+      const sortBy = document.getElementById("radarSort").value;
 
       const filtered = allRecords.filter(r => {
         if (isAppliedRecord(r)) return false;
-        const loc = (r.location || "").toLowerCase();
 
+        // Filter Waktu Masuk Dashboard
+        const dayDiff = getWibDayDiff(r.created_at);
+        if (intakeFilter === "today" && dayDiff !== 0) return false;
+        if (intakeFilter === "yesterday" && dayDiff !== 1) return false;
+
+        const loc = (r.location || "").toLowerCase();
         let matchRegion = true;
         if (region === "malang") matchRegion = loc.includes("malang") || loc.includes("batu");
         else if (region === "surabaya") matchRegion = loc.includes("surabaya");
@@ -743,21 +869,50 @@
         return matchRegion && matchCluster && matchMode && matchSource && matchText;
       });
 
+      // Opsi Pengurutan (Sort By)
       filtered.sort((a, b) => {
+        if (sortBy === "intake_desc") {
+          // Kelompokkan per sesi scrape (rentang 1 jam) agar batch terbaru selalu di atas,
+          // dan di dalam batch yang sama tetap urut Malang & Match CV tertinggi
+          const sessionA = Math.floor(new Date(a.created_at).getTime() / (1000 * 60 * 60));
+          const sessionB = Math.floor(new Date(b.created_at).getTime() / (1000 * 60 * 60));
+          if (sessionB !== sessionA) return sessionB - sessionA;
+
+          const regDiff = getRegionScore(a) - getRegionScore(b);
+          if (regDiff !== 0) return regDiff;
+          return getCvMatchScore(b) - getCvMatchScore(a);
+        }
+
+        if (sortBy === "posted_desc") {
+          const tA = new Date(a.posted_at || a.created_at).getTime();
+          const tB = new Date(b.posted_at || b.created_at).getTime();
+          return tB - tA;
+        }
+
+        if (sortBy === "closing_asc") {
+          const cA = a.closing_at ? new Date(a.closing_at).getTime() : Number.MAX_SAFE_INTEGER;
+          const cB = b.closing_at ? new Date(b.closing_at).getTime() : Number.MAX_SAFE_INTEGER;
+          if (cA !== cB) return cA - cB;
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        }
+
+        // Default "priority": Prioritas Malang & Kecocokan CV
         const regDiff = getRegionScore(a) - getRegionScore(b);
         if (regDiff !== 0) return regDiff;
-        return getCvMatchScore(b) - getCvMatchScore(a);
+        const scoreDiff = getCvMatchScore(b) - getCvMatchScore(a);
+        if (scoreDiff !== 0) return scoreDiff;
+        return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       });
 
-      document.getElementById("radarCountLabel").innerText = `Menampilkan ${filtered.length} lowongan (Prioritas Malang & Kecocokan CV)`;
+      document.getElementById("radarCountLabel").innerText = `Menampilkan ${filtered.length} lowongan`;
       const tbody = document.getElementById("radarTableBody");
 
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="5" class="py-14 text-center">
-              <div class="text-slate-400 text-sm font-medium">Tidak ada lowongan baru pada filter ini</div>
-              <p class="text-xs text-slate-400 mt-1">Coba ubah filter daerah atau jalankan workflow scraper di GitHub Actions.</p>
+            <td colspan="5" class="py-12 text-center">
+              <div class="text-zinc-500 text-sm font-medium">Tidak ada lowongan pada kombinasi filter ini</div>
+              <p class="text-xs text-zinc-400 mt-1">Ubah filter waktu masuk atau jalankan workflow scraper di GitHub Actions.</p>
             </td>
           </tr>`;
         return;
@@ -766,57 +921,86 @@
       tbody.innerHTML = filtered.map(r => {
         const score = getCvMatchScore(r);
         const isMalang = (r.location || "").toLowerCase().includes("malang");
-        const postedBadge = formatPostedBadge(r.posted_at, r.created_at);
+        const isNew = isNewIntake(r.created_at);
+        const intakeLabel = formatIntakeTimestamp(r.created_at);
+        const postedLabel = formatPostedText(r.posted_at);
         const closingBadge = formatClosingBadge(r.closing_at);
 
-        let scoreBadge = `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">${score}% Match</span>`;
+        const rowAccentClass = isNew
+          ? "border-l-[3px] border-l-emerald-500 bg-emerald-50/20 hover:bg-emerald-50/40"
+          : "border-l-[3px] border-l-transparent hover:bg-zinc-50/80";
+
+        const newBadge = isNew
+          ? `<span class="font-mono-num text-[10px] font-semibold tracking-wider uppercase px-1.5 py-0.5 rounded bg-emerald-600 text-white">NEW</span>`
+          : "";
+
+        let scoreBadge = `<span class="font-mono-num text-[11px] font-medium px-2 py-0.5 rounded bg-zinc-100 text-zinc-600">${score}% match</span>`;
         if (score >= 85) {
-          scoreBadge = `<span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80">★ ${score}% Match</span>`;
+          scoreBadge = `<span class="font-mono-num text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">${score}% match</span>`;
         } else if (score >= 70) {
-          scoreBadge = `<span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200/60">${score}% Match</span>`;
+          scoreBadge = `<span class="font-mono-num text-[11px] font-medium px-2 py-0.5 rounded bg-zinc-900 text-white">${score}% match</span>`;
         }
 
-        const locBadge = isMalang
-          ? `<div class="inline-flex items-center gap-1 text-emerald-700 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-md font-semibold">📍 ${esc(r.location)}</div>`
-          : `<div class="text-slate-700 font-medium">${esc(r.location || "Indonesia")}</div>`;
+        const locDisplay = isMalang
+          ? `<div class="inline-flex items-center gap-1.5 text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded font-semibold">
+               <span class="w-1.5 h-1.5 rounded-full bg-emerald-600"></span>
+               <span>${esc(r.location)}</span>
+             </div>`
+          : `<div class="text-zinc-700 font-medium">${esc(r.location || "Indonesia")}</div>`;
 
         return `
-          <tr class="hover:bg-slate-50/90 transition-colors group ${isMalang ? 'bg-emerald-50/15' : ''}">
-            <td class="py-4 px-4">
+          <tr class="transition-colors group ${rowAccentClass}">
+            <td class="py-3.5 px-4">
               <div class="flex flex-wrap items-center gap-2">
-                <span class="font-bold text-slate-900 group-hover:text-indigo-600 transition-colors">${esc(r.title)}</span>
+                ${newBadge}
+                <span class="font-semibold text-zinc-900 group-hover:text-black">${esc(r.title)}</span>
                 ${scoreBadge}
               </div>
-              <div class="text-xs font-medium text-slate-600 mt-1">${esc(r.company)}</div>
-              <div class="flex flex-wrap items-center gap-2 mt-1.5">
-                ${postedBadge}
+
+              <div class="text-xs font-medium text-zinc-600 mt-1">${esc(r.company)}</div>
+
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-[11px]">
+                <span class="${isNew ? 'text-emerald-700 font-semibold' : 'text-zinc-500'}">
+                  Masuk dashboard: ${esc(intakeLabel)}
+                </span>
+                ${postedLabel ? `<span class="text-zinc-400">• ${esc(postedLabel)}</span>` : ""}
                 ${closingBadge}
               </div>
             </td>
-            <td class="py-4 px-4">
-              <span class="text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700">${esc(r.role_cluster)}</span>
+
+            <td class="py-3.5 px-4">
+              <span class="text-[11px] font-medium px-2 py-1 rounded bg-zinc-100 text-zinc-700 border border-zinc-200/70">${esc(r.role_cluster)}</span>
             </td>
-            <td class="py-4 px-4 text-xs space-y-1">
-              ${locBadge}
-              <div class="text-slate-400 font-medium">${esc(r.work_mode)}</div>
+
+            <td class="py-3.5 px-4 text-xs space-y-1">
+              ${locDisplay}
+              <div class="text-zinc-400">${esc(r.work_mode)}</div>
             </td>
-            <td class="py-4 px-4">
+
+            <td class="py-3.5 px-4">
               ${getSourceBadge(r.source)}
             </td>
-            <td class="py-4 px-4 text-right whitespace-nowrap space-x-1.5">
-              <a href="${esc(r.job_url)}" target="_blank" rel="noopener noreferrer"
-                 class="inline-flex items-center text-xs font-semibold px-3 py-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition">
-                Lihat
-              </a>
-              <button onclick="applyAndMove('${r.id}')"
-                      class="inline-flex items-center gap-1 text-xs font-semibold px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition">
-                <span>Lamar & Pindahkan</span>
-                <span>&rarr;</span>
-              </button>
-              <button onclick="deleteJob('${r.id}')" title="Hapus dari Radar"
-                      class="inline-flex items-center text-xs p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition">
-                &times;
-              </button>
+
+            <td class="py-3.5 px-4 text-right whitespace-nowrap">
+              <div class="inline-flex items-center gap-1.5">
+                <a href="${esc(r.job_url)}" target="_blank" rel="noopener noreferrer"
+                   class="inline-flex items-center text-xs font-medium px-2.5 py-1.5 rounded-lg border border-zinc-200 text-zinc-700 hover:bg-zinc-100 transition-colors">
+                  Buka
+                </a>
+                <button onclick="applyAndMove('${r.id}')"
+                        class="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white transition-colors">
+                  <span>Lamar</span>
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                  </svg>
+                </button>
+                <button onclick="deleteJob('${r.id}')" title="Hapus dari Radar"
+                        class="inline-flex items-center p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </td>
           </tr>
         `;
@@ -842,19 +1026,19 @@
         return;
       }
 
-      showToast(`"${rec.title}" dipindahkan ke Lamaran Saya!`);
+      showToast(`"${rec.title}" dipindahkan ke Lamaran Saya.`);
       await fetchAllData();
     }
 
     // =========================================================================
-    // VIEW 2: LAMARAN SAYA (TRACKER & CATATAN PERMANEN)
+    // VIEW 2: LAMARAN SAYA
     // =========================================================================
     function setStageFilter(val) {
       stageFilter = val;
       document.querySelectorAll(".stage-btn").forEach(btn => {
         btn.className = btn.getAttribute("data-val") === val
-          ? "stage-btn bg-indigo-600 text-white text-xs font-semibold px-3.5 py-1.5 rounded-xl transition"
-          : "stage-btn bg-slate-100 text-slate-600 hover:bg-slate-200/80 text-xs font-semibold px-3.5 py-1.5 rounded-xl transition";
+          ? "stage-btn bg-zinc-900 text-white text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
+          : "stage-btn bg-zinc-100 text-zinc-600 hover:bg-zinc-200/70 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors";
       });
       renderAppliedTable();
     }
@@ -881,21 +1065,21 @@
       if (filtered.length === 0) {
         tbody.innerHTML = `
           <tr>
-            <td colspan="5" class="py-14 text-center">
-              <div class="text-slate-400 text-sm font-medium">Belum ada lamaran pada tahap ini</div>
-              <p class="text-xs text-slate-400 mt-1">Klik "Lamar & Pindahkan" pada Radar Lowongan atau gunakan tombol "+ Catat Lowongan / Lamaran".</p>
+            <td colspan="5" class="py-12 text-center">
+              <div class="text-zinc-500 text-sm font-medium">Belum ada lamaran pada tahap ini</div>
+              <p class="text-xs text-zinc-400 mt-1">Klik "Lamar" pada Radar Lowongan atau gunakan tombol "Catat Lamaran".</p>
             </td>
           </tr>`;
         return;
       }
 
       const badgeMap = {
-        "Applied": "bg-blue-50 text-blue-700 border-blue-200/80",
-        "Online Test": "bg-purple-50 text-purple-700 border-purple-200/80",
-        "HR Interview": "bg-amber-50 text-amber-700 border-amber-200/80",
-        "User Interview": "bg-orange-50 text-orange-700 border-orange-200/80",
-        "Offer": "bg-emerald-50 text-emerald-700 border-emerald-200/80",
-        "Rejected": "bg-rose-50 text-rose-700 border-rose-200/80"
+        "Applied": "bg-sky-50 text-sky-700 border-sky-200",
+        "Online Test": "bg-violet-50 text-violet-700 border-violet-200",
+        "HR Interview": "bg-amber-50 text-amber-800 border-amber-200",
+        "User Interview": "bg-orange-50 text-orange-800 border-orange-200",
+        "Offer": "bg-emerald-50 text-emerald-700 border-emerald-200",
+        "Rejected": "bg-rose-50 text-rose-700 border-rose-200"
       };
 
       tbody.innerHTML = filtered.map(r => {
@@ -905,35 +1089,43 @@
         const closingBadge = formatClosingBadge(r.closing_at);
 
         return `
-          <tr class="hover:bg-slate-50/90 transition-colors">
-            <td class="py-4 px-4">
+          <tr class="hover:bg-zinc-50/80 transition-colors">
+            <td class="py-3.5 px-4">
               <div class="flex items-center gap-1.5">
-                <span class="font-bold text-slate-900">${esc(r.title)}</span>
-                <a href="${esc(r.job_url)}" target="_blank" rel="noopener noreferrer" title="Buka Portal Lowongan" class="text-slate-400 hover:text-indigo-600 text-xs font-bold">↗</a>
+                <span class="font-semibold text-zinc-900">${esc(r.title)}</span>
+                <a href="${esc(r.job_url)}" target="_blank" rel="noopener noreferrer" title="Buka Portal" class="text-zinc-400 hover:text-zinc-900">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25" />
+                  </svg>
+                </a>
               </div>
-              <div class="text-xs font-medium text-slate-500 mt-1">${esc(r.company)} • <span class="text-slate-400">${esc(r.role_cluster)} (${esc(r.work_mode)})</span></div>
+              <div class="text-xs text-zinc-500 mt-0.5">${esc(r.company)} • <span class="text-zinc-400">${esc(r.role_cluster)} (${esc(r.work_mode)})</span></div>
               ${closingBadge ? `<div class="mt-1.5">${closingBadge}</div>` : ""}
             </td>
-            <td class="py-4 px-4">
-              <span class="inline-block text-xs font-bold px-2.5 py-1 rounded-full border ${badgeMap[r.app_status] || 'bg-slate-100 text-slate-700'}">
+
+            <td class="py-3.5 px-4">
+              <span class="inline-block text-[11px] font-semibold px-2.5 py-0.5 rounded-md border ${badgeMap[r.app_status] || 'bg-zinc-100 text-zinc-700 border-zinc-200'}">
                 ${esc(r.app_status)}
               </span>
-              <div class="text-[11px] font-medium text-slate-400 mt-1.5">Tgl Lamar: ${esc(r.applied_date || "-")}</div>
+              <div class="text-[11px] text-zinc-400 mt-1 tabular-nums">Dilamar: ${esc(r.applied_date || "-")}</div>
             </td>
-            <td class="py-4 px-4 text-xs">
+
+            <td class="py-3.5 px-4 text-xs">
               ${r.cv_version
-                ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-semibold">📄 ${esc(r.cv_version)}</span>`
-                : `<span class="text-slate-400 italic">Belum dicatat</span>`}
+                ? `<span class="font-mono-num text-[11px] px-2 py-1 rounded bg-zinc-100 text-zinc-700 border border-zinc-200/80">${esc(r.cv_version)}</span>`
+                : `<span class="text-zinc-400 italic">Belum dicatat</span>`}
             </td>
-            <td class="py-4 px-4 text-xs max-w-xs">
-              ${schText ? `<div class="font-bold text-amber-700 mb-1">📅 ${esc(schText)}</div>` : ""}
-              <p class="text-slate-600 leading-relaxed line-clamp-2">${esc(r.notes || "-")}</p>
+
+            <td class="py-3.5 px-4 text-xs max-w-xs">
+              ${schText ? `<div class="font-semibold text-amber-800 mb-1 tabular-nums">Jadwal: ${esc(schText)}</div>` : ""}
+              <p class="text-zinc-600 leading-relaxed line-clamp-2">${esc(r.notes || "-")}</p>
             </td>
-            <td class="py-4 px-4 text-right whitespace-nowrap space-x-1.5">
-              <button onclick="openTrackModal('${r.id}')" class="text-xs font-semibold px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-indigo-600 text-white shadow-sm transition">
-                Edit & Catat
+
+            <td class="py-3.5 px-4 text-right whitespace-nowrap space-x-1">
+              <button onclick="openTrackModal('${r.id}')" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white transition-colors">
+                Edit
               </button>
-              <button onclick="deleteJob('${r.id}')" title="Hapus Permanen" class="text-xs font-medium px-2.5 py-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition">
+              <button onclick="deleteJob('${r.id}')" class="text-xs font-medium px-2.5 py-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 transition-colors">
                 Hapus
               </button>
             </td>
@@ -977,7 +1169,7 @@
       const title = document.getElementById("inTitle").value.trim();
       const company = document.getElementById("inCompany").value.trim();
       const job_url = document.getElementById("inUrl").value.trim();
-      if (!title || !company || !job_url) return alert("Judul posisi, nama perusahaan, dan link lowongan wajib diisi.");
+      if (!title || !company || !job_url) return alert("Judul posisi, nama perusahaan, dan tautan lowongan wajib diisi.");
 
       const btn = document.getElementById("btnSaveManual");
       btn.disabled = true;
@@ -1016,7 +1208,7 @@
 
       btn.disabled = false;
       closeAddModal();
-      showToast(initialStatus === "Wishlist" ? "Ditambahkan ke Radar Lowongan" : "Tersimpan di Lamaran Saya!");
+      showToast(initialStatus === "Wishlist" ? "Ditambahkan ke Radar Lowongan" : "Tersimpan di Lamaran Saya");
       if (initialStatus !== "Wishlist") switchMainTab("applied");
       fetchAllData();
     }
@@ -1118,7 +1310,7 @@
       if (error) return alert("Gagal memperbarui data: " + error.message);
 
       closeTrackModal();
-      showToast("Perubahan lamaran berhasil disimpan!");
+      showToast("Perubahan lamaran disimpan");
       fetchAllData();
     }
 
@@ -1126,7 +1318,7 @@
       if (!confirm("Hapus data ini secara permanen?")) return;
       const { error } = await sb.from("job_listings").delete().eq("id", jobId);
       if (error) return alert("Gagal menghapus: " + error.message);
-      showToast("Data berhasil dihapus.");
+      showToast("Data dihapus");
       fetchAllData();
     }
 
