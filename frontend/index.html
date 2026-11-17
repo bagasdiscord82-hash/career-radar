@@ -703,31 +703,38 @@
     // SCORING & PRIORITAS DAERAH
     // =========================================================================
     function getCvMatchScore(r) {
-      const t = (r.title || "").toLowerCase();
-      const loc = (r.location || "").toLowerCase();
-      let score = 45;
+  const rawTitle = r.title || "";
+  const t = rawTitle.toLowerCase();
+  const loc = (r.location || "").toLowerCase();
+  let score = 45;
 
-      const tier1 = [
-        "ui/ux", "ui ux", "figma", "graphic design", "desain grafis", "social media",
-        "visual content", "content creator", "it support", "helpdesk", "technical support",
-        "network", "jaringan", "event", "management trainee", "odp", "bflp"
-      ];
-      const tier2 = [
-        "creative", "canva", "digital marketing", "e-commerce", "ecommerce", "marketplace",
-        "admin", "administrasi", "data entry", "operations", "operasional", "project officer",
-        "web developer", "frontend", "front-end", "junior developer", "it staff", "staff it",
-        "fresh graduate", "semua jurusan", "copywriter", "brand"
-      ];
+  const leadershipRegex = /\b(management trainee|management development|management associate|leadership development|leadership acceleration|future leader|global leader|young leader|emerging leader|accelerated development|talent acceleration|executive trainee|executive development|officer development|graduate trainee|graduate program|graduate development|associate development|fast[\s-]?track|next[\s-]?gen|commercial trainee|operations trainee|supply chain trainee|store management trainee|retail management trainee|it trainee|tech trainee|associate product manager|finance trainee|hr trainee|planters development|pendidikan calon|bimbingan profesi sarjana|bimbingan praktis ahli|kader pimpinan|calon pimpinan|akselerasi kepemimpinan|brilian future|bca development|wealth management program|relationship manager development|hi[\s-]?movers|the complete banker|danamon bankers|permatabanker|maybank apprentice|international graduate|allianz management|prudential graduate|unilever future|mt star|seedz|bogasari development|paragon leader|mayora development|kalbe ldp|sampoerna graduate|gudang garam development|astra graduate|app future|meratus star|great people trainee|ut future|pama mt|shopee glp|sea map|gojek accelerates|blibli future)\b/i;
+  const leadershipAcronymRegex = /\b(MT|MDP|LDP|LAP|FLP|GLP|YLP|ELP|ADP|TAP|EDP|ODP|GT|GDP|FGDP|FGP|RMT|APM|PCP|PCPM|PCS|BPS|BPA|BFLP|BDP|WMP|RMDP|TCB|DBT|GMAP|IGP|FADP|AMA|UFLP|IMT|PLDP|NMT|GMT|KMT|GDMP|AGP|TMT|TEDP|SMDP|GPTP|BFL|KLMT)\b/;
 
-      if (tier1.some(k => t.includes(k))) score += 35;
-      else if (tier2.some(k => t.includes(k))) score += 22;
+  const tier1 = [
+    "ui/ux", "ui ux", "figma", "graphic design", "desain grafis", "social media",
+    "visual content", "content creator", "it support", "helpdesk", "technical support",
+    "network", "jaringan", "event"
+  ];
+  const tier2 = [
+    "creative", "canva", "digital marketing", "e-commerce", "ecommerce", "marketplace",
+    "admin", "administrasi", "data entry", "operations", "operasional", "project officer",
+    "web developer", "frontend", "front-end", "junior developer", "it staff", "staff it",
+    "fresh graduate", "semua jurusan", "copywriter", "brand"
+  ];
 
-      if (loc.includes("malang") || loc.includes("batu")) score += 18;
-      else if (r.work_mode === "Remote") score += 14;
-      else if (["surabaya", "sidoarjo", "gresik", "jawa timur", "east java"].some(c => loc.includes(c))) score += 8;
+  if (leadershipRegex.test(t) || leadershipAcronymRegex.test(rawTitle) || tier1.some(k => t.includes(k))) {
+    score += 35;
+  } else if (tier2.some(k => t.includes(k))) {
+    score += 22;
+  }
 
-      return Math.min(score, 99);
-    }
+  if (loc.includes("malang") || loc.includes("batu")) score += 18;
+  else if (r.work_mode === "Remote") score += 14;
+  else if (["surabaya", "sidoarjo", "gresik", "jawa timur", "east java"].some(c => loc.includes(c))) score += 8;
+
+  return Math.min(score, 99);
+}
 
     function getRegionScore(r) {
       const loc = (r.location || "").toLowerCase();
