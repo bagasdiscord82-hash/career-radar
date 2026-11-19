@@ -13,6 +13,9 @@ SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID")
 
+# Batas maksimal usia terbit asli dari portal (hari) agar lowongan lama tidak masuk
+MAX_POSTED_AGE_DAYS = 10
+
 HTTP_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
     "Accept": "application/json, text/plain, */*",
@@ -349,6 +352,19 @@ def is_expired_listing(closing_iso: str | None) -> bool:
         return False
 
 
+def is_too_old_listing(posted_iso: str | None, max_days: int = MAX_POSTED_AGE_DAYS) -> bool:
+    """Mengeliminasi lowongan yang tanggal terbit aslinya di portal sudah lebih dari max_days hari."""
+    if not posted_iso:
+        return False
+    try:
+        dt = datetime.fromisoformat(posted_iso.replace("Z", "+00:00"))
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return (datetime.now(timezone.utc) - dt) > timedelta(days=max_days)
+    except Exception:
+        return False
+
+
 def is_leadership_program(title: str) -> bool:
     """Mendeteksi program akselerasi kepemimpinan (universal, BUMN, & branded corporate)."""
     raw_title = str(title or "")
@@ -426,7 +442,35 @@ def calculate_cv_match_score(title: str, location: str, work_mode: str) -> int:
     return min(score, 99)
 
 
+# ==============================================================================
+# 4. SMART HASH NORMALIZATION (ANTI-DUPLIKAT LINTAS PORTAL & VARIASI NAMA PT)
+# ==============================================================================
+def normalize_company_name(company: str) -> str:
+    s = str(company or "").lower().strip()
+    s = re.sub(r"\((?:persero|tbk|indonesia)\)", " ", s)
+    s = re.sub(r"\b(?:pt|cv|persero|tbk|ltd|limited|inc|incorporated|corp|corporation|co)\b\.?", " ", s)
+    s = re.sub(r"[^a-z0-9\s]", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
+def normalize_job_title(title: str) -> str:
+    s = str(title or "").lower().strip()
+    s = re.sub(r"\[[^\]]*\]", " ", s)
+    s = re.sub(r"[^a-z0-9\s]", " ", s)
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
+
+
 def generate_hash(company: str, title: str) -> str:
+    norm_c = normalize_company_name(company) or str(company).strip().lower()
+    norm_t = normalize_job_title(title) or str(title).strip().lower()
+    raw = f"{norm_c}_{norm_t}"
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def generate_legacy_hash(company: str, title: str) -> str:
+    """Hash format lama untuk kompatibilitas mundur dengan data sebelum normalisasi."""
     raw = f"{str(company).strip().lower()}_{str(title).strip().lower()}"
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
@@ -631,19 +675,49 @@ def fetch_jobspy_jobs() -> list:
     return results
 
 
+# ==============================================================================
+# PEMBERSIHAN RADAR 48 JAM DENGAN MEMORI HASH PERMANEN (seen_job_hashes)
+# ==============================================================================
+def archive_hashes_to_memory(supabase: Client, hash_rows: list):
+    """Menyimpan sidik jari lowongan ke tabel permanen seen_job_hashes."""
+    if not hash_rows:
+        return
+    deduped = {}
+    for row in hash_rows:
+        h = row.get("external_hash")
+        if h and h not in deduped:
+            deduped[h] = {
+                "external_hash": h,
+                "title": str(row.get("title") or "")[:250],
+                "company": str(row.get("company") or "")[:250],
+                "source": str(row.get("source") or "")[:60],
+            }
+    payload = list(deduped.values())
+    for i in range(0, len(payload), 100):
+        supabase.table("seen_job_hashes").upsert(
+            payload[i:i + 100],
+            on_conflict="external_hash",
+            ignore_duplicates=True
+        ).execute()
+
+
 def refresh_unapplied_radar(supabase: Client, max_age_hours: int = 48):
     cutoff = (datetime.now(timezone.utc) - timedelta(hours=max_age_hours)).isoformat()
     applied_res = supabase.table("applications").select("job_id").neq("status", "Wishlist").execute()
     protected_ids = {row["job_id"] for row in (applied_res.data or [])}
 
-    old_jobs = supabase.table("job_listings").select("id").lt("created_at", cutoff).execute()
-    stale_ids = [row["id"] for row in (old_jobs.data or []) if row["id"] not in protected_ids]
+    old_jobs = supabase.table("job_listings").select("id, external_hash, title, company, source").lt("created_at", cutoff).execute()
+    stale_rows = [row for row in (old_jobs.data or []) if row["id"] not in protected_ids]
 
-    if stale_ids:
+    if stale_rows:
+        # Pastikan seluruh hash tercatat permanen di seen_job_hashes sebelum dihapus dari radar
+        archive_hashes_to_memory(supabase, stale_rows)
+
+        stale_ids = [row["id"] for row in stale_rows]
         for i in range(0, len(stale_ids), 100):
             batch = stale_ids[i:i + 100]
             supabase.table("job_listings").delete().in_("id", batch).execute()
-        print(f"Auto-refresh: {len(stale_ids)} lowongan lama (> {max_age_hours} jam) dibersihkan.")
+        print(f"Auto-refresh: {len(stale_ids)} lowongan lama (> {max_age_hours} jam) diarsipkan hash-nya & dibersihkan dari radar.")
 
 
 def transform_and_load(raw_jobs: list, supabase: Client) -> list:
@@ -652,12 +726,14 @@ def transform_and_load(raw_jobs: list, supabase: Client) -> list:
 
     now_iso = datetime.now(timezone.utc).isoformat()
     records = []
-    seen_hashes = set()
+    seen_batch_hashes = set()
+    skipped_old = 0
 
     for item in raw_jobs:
         title = str(item.get("title", "")).strip()
         company = str(item.get("company", "")).strip()
         job_url = str(item.get("job_url", "")).strip()
+        posted_iso = item.get("posted_at")
         closing_iso = item.get("closing_at")
 
         if not title or not company or not is_valid_job_url(job_url):
@@ -666,13 +742,20 @@ def transform_and_load(raw_jobs: list, supabase: Client) -> list:
         if is_expired_listing(closing_iso):
             continue
 
+        if is_too_old_listing(posted_iso, max_days=MAX_POSTED_AGE_DAYS):
+            skipped_old += 1
+            continue
+
         if is_excluded_role(title):
             continue
 
         ext_hash = generate_hash(company, title)
-        if ext_hash in seen_hashes:
+        legacy_hash = generate_legacy_hash(company, title)
+
+        if ext_hash in seen_batch_hashes or legacy_hash in seen_batch_hashes:
             continue
-        seen_hashes.add(ext_hash)
+        seen_batch_hashes.add(ext_hash)
+        seen_batch_hashes.add(legacy_hash)
 
         location = str(item.get("location", "Indonesia")).strip()
         work_mode = str(item.get("work_mode", "Onsite")).strip()
@@ -681,6 +764,7 @@ def transform_and_load(raw_jobs: list, supabase: Client) -> list:
 
         records.append({
             "external_hash": ext_hash,
+            "_legacy_hash": legacy_hash,
             "title": title[:250],
             "company": company[:250],
             "role_cluster": classify_cluster(title),
@@ -688,32 +772,54 @@ def transform_and_load(raw_jobs: list, supabase: Client) -> list:
             "work_mode": work_mode,
             "source": source,
             "job_url": job_url,
-            "posted_at": item.get("posted_at") or now_iso,
+            "posted_at": posted_iso or now_iso,
             "closing_at": closing_iso,
             "_match_score": match_score
         })
+
+    if skipped_old:
+        print(f"Filter usia terbit: {skipped_old} lowongan lawas (> {MAX_POSTED_AGE_DAYS} hari) diabaikan.")
 
     if not records:
         return []
 
     records.sort(key=lambda x: x["_match_score"], reverse=True)
 
-    existing_hashes = set()
-    all_hashes = [r["external_hash"] for r in records]
-    for i in range(0, len(all_hashes), 100):
-        batch = all_hashes[i:i + 100]
-        existing_res = supabase.table("job_listings").select("external_hash").in_("external_hash", batch).execute()
-        for row in (existing_res.data or []):
-            existing_hashes.add(row["external_hash"])
+    # Kumpulkan seluruh kandidat hash (normalized + legacy) untuk dicek ke job_listings & seen_job_hashes
+    candidate_hashes = list({
+        h for r in records for h in (r["external_hash"], r["_legacy_hash"])
+    })
 
-    new_records = [r for r in records if r["external_hash"] not in existing_hashes]
+    known_hashes = set()
+    for i in range(0, len(candidate_hashes), 100):
+        batch = candidate_hashes[i:i + 100]
+
+        # 1. Cek di radar aktif & lamaran yang sedang tersimpan
+        active_res = supabase.table("job_listings").select("external_hash").in_("external_hash", batch).execute()
+        for row in (active_res.data or []):
+            known_hashes.add(row["external_hash"])
+
+        # 2. Cek di memori permanen (lowongan yang sudah pernah masuk / dihapus)
+        mem_res = supabase.table("seen_job_hashes").select("external_hash").in_("external_hash", batch).execute()
+        for row in (mem_res.data or []):
+            known_hashes.add(row["external_hash"])
+
+    new_records = [
+        r for r in records
+        if r["external_hash"] not in known_hashes and r["_legacy_hash"] not in known_hashes
+    ]
 
     if new_records:
         telegram_batch = [dict(r) for r in new_records]
         for r in new_records:
             r.pop("_match_score", None)
+            r.pop("_legacy_hash", None)
+
         for i in range(0, len(new_records), 100):
             supabase.table("job_listings").upsert(new_records[i:i + 100], on_conflict="external_hash").execute()
+
+        # Rekam juga ke memori hash permanen
+        archive_hashes_to_memory(supabase, new_records)
         return telegram_batch
 
     return []
