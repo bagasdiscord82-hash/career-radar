@@ -703,38 +703,38 @@
     // SCORING & PRIORITAS DAERAH
     // =========================================================================
     function getCvMatchScore(r) {
-  const rawTitle = r.title || "";
-  const t = rawTitle.toLowerCase();
-  const loc = (r.location || "").toLowerCase();
-  let score = 45;
+      const rawTitle = r.title || "";
+      const t = rawTitle.toLowerCase();
+      const loc = (r.location || "").toLowerCase();
+      let score = 45;
 
-  const leadershipRegex = /\b(management trainee|management development|management associate|leadership development|leadership acceleration|future leader|global leader|young leader|emerging leader|accelerated development|talent acceleration|executive trainee|executive development|officer development|graduate trainee|graduate program|graduate development|associate development|fast[\s-]?track|next[\s-]?gen|commercial trainee|operations trainee|supply chain trainee|store management trainee|retail management trainee|it trainee|tech trainee|associate product manager|finance trainee|hr trainee|planters development|pendidikan calon|bimbingan profesi sarjana|bimbingan praktis ahli|kader pimpinan|calon pimpinan|akselerasi kepemimpinan|brilian future|bca development|wealth management program|relationship manager development|hi[\s-]?movers|the complete banker|danamon bankers|permatabanker|maybank apprentice|international graduate|allianz management|prudential graduate|unilever future|mt star|seedz|bogasari development|paragon leader|mayora development|kalbe ldp|sampoerna graduate|gudang garam development|astra graduate|app future|meratus star|great people trainee|ut future|pama mt|shopee glp|sea map|gojek accelerates|blibli future)\b/i;
-  const leadershipAcronymRegex = /\b(MT|MDP|LDP|LAP|FLP|GLP|YLP|ELP|ADP|TAP|EDP|ODP|GT|GDP|FGDP|FGP|RMT|APM|PCP|PCPM|PCS|BPS|BPA|BFLP|BDP|WMP|RMDP|TCB|DBT|GMAP|IGP|FADP|AMA|UFLP|IMT|PLDP|NMT|GMT|KMT|GDMP|AGP|TMT|TEDP|SMDP|GPTP|BFL|KLMT)\b/;
+      const leadershipRegex = /\b(management trainee|management development|management associate|leadership development|leadership acceleration|future leader|global leader|young leader|emerging leader|accelerated development|talent acceleration|executive trainee|executive development|officer development|graduate trainee|graduate program|graduate development|associate development|fast[\s-]?track|next[\s-]?gen|commercial trainee|operations trainee|supply chain trainee|store management trainee|retail management trainee|it trainee|tech trainee|associate product manager|finance trainee|hr trainee|planters development|pendidikan calon|bimbingan profesi sarjana|bimbingan praktis ahli|kader pimpinan|calon pimpinan|akselerasi kepemimpinan|brilian future|bca development|wealth management program|relationship manager development|hi[\s-]?movers|the complete banker|danamon bankers|permatabanker|maybank apprentice|international graduate|allianz management|prudential graduate|unilever future|mt star|seedz|bogasari development|paragon leader|mayora development|kalbe ldp|sampoerna graduate|gudang garam development|astra graduate|app future|meratus star|great people trainee|ut future|pama mt|shopee glp|sea map|gojek accelerates|blibli future)\b/i;
+      const leadershipAcronymRegex = /\b(MT|MDP|LDP|LAP|FLP|GLP|YLP|ELP|ADP|TAP|EDP|ODP|GT|GDP|FGDP|FGP|RMT|APM|PCP|PCPM|PCS|BPS|BPA|BFLP|BDP|WMP|RMDP|TCB|DBT|GMAP|IGP|FADP|AMA|UFLP|IMT|PLDP|NMT|GMT|KMT|GDMP|AGP|TMT|TEDP|SMDP|GPTP|BFL|KLMT)\b/;
 
-  const tier1 = [
-    "ui/ux", "ui ux", "figma", "graphic design", "desain grafis", "social media",
-    "visual content", "content creator", "it support", "helpdesk", "technical support",
-    "network", "jaringan", "event"
-  ];
-  const tier2 = [
-    "creative", "canva", "digital marketing", "e-commerce", "ecommerce", "marketplace",
-    "admin", "administrasi", "data entry", "operations", "operasional", "project officer",
-    "web developer", "frontend", "front-end", "junior developer", "it staff", "staff it",
-    "fresh graduate", "semua jurusan", "copywriter", "brand"
-  ];
+      const tier1 = [
+        "ui/ux", "ui ux", "figma", "graphic design", "desain grafis", "social media",
+        "visual content", "content creator", "it support", "helpdesk", "technical support",
+        "network", "jaringan", "event"
+      ];
+      const tier2 = [
+        "creative", "canva", "digital marketing", "e-commerce", "ecommerce", "marketplace",
+        "admin", "administrasi", "data entry", "operations", "operasional", "project officer",
+        "web developer", "frontend", "front-end", "junior developer", "it staff", "staff it",
+        "fresh graduate", "semua jurusan", "copywriter", "brand"
+      ];
 
-  if (leadershipRegex.test(t) || leadershipAcronymRegex.test(rawTitle) || tier1.some(k => t.includes(k))) {
-    score += 35;
-  } else if (tier2.some(k => t.includes(k))) {
-    score += 22;
-  }
+      if (leadershipRegex.test(t) || leadershipAcronymRegex.test(rawTitle) || tier1.some(k => t.includes(k))) {
+        score += 35;
+      } else if (tier2.some(k => t.includes(k))) {
+        score += 22;
+      }
 
-  if (loc.includes("malang") || loc.includes("batu")) score += 18;
-  else if (r.work_mode === "Remote") score += 14;
-  else if (["surabaya", "sidoarjo", "gresik", "jawa timur", "east java"].some(c => loc.includes(c))) score += 8;
+      if (loc.includes("malang") || loc.includes("batu")) score += 18;
+      else if (r.work_mode === "Remote") score += 14;
+      else if (["surabaya", "sidoarjo", "gresik", "jawa timur", "east java"].some(c => loc.includes(c))) score += 8;
 
-  return Math.min(score, 99);
-}
+      return Math.min(score, 99);
+    }
 
     function getRegionScore(r) {
       const loc = (r.location || "").toLowerCase();
@@ -879,8 +879,6 @@
       // Opsi Pengurutan (Sort By)
       filtered.sort((a, b) => {
         if (sortBy === "intake_desc") {
-          // Kelompokkan per sesi scrape (rentang 1 jam) agar batch terbaru selalu di atas,
-          // dan di dalam batch yang sama tetap urut Malang & Match CV tertinggi
           const sessionA = Math.floor(new Date(a.created_at).getTime() / (1000 * 60 * 60));
           const sessionB = Math.floor(new Date(b.created_at).getTime() / (1000 * 60 * 60));
           if (sessionB !== sessionA) return sessionB - sessionA;
@@ -1142,6 +1140,41 @@
     }
 
     // =========================================================================
+    // NORMALISASI HASH & MEMORI PERMANEN (seen_job_hashes)
+    // =========================================================================
+    function normalizeCompanyName(company) {
+      return String(company || "")
+        .toLowerCase()
+        .trim()
+        .replace(/\((?:persero|tbk|indonesia)\)/g, " ")
+        .replace(/\b(?:pt|cv|persero|tbk|ltd|limited|inc|incorporated|corp|corporation|co)\b\.?/g, " ")
+        .replace(/[^a-z0-9\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    function normalizeJobTitle(title) {
+      return String(title || "")
+        .toLowerCase()
+        .trim()
+        .replace(/\[[^\]]*\]/g, " ")
+        .replace(/[^a-z0-9\s]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    }
+
+    async function sha256(str) {
+      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    async function generateNormalizedHash(company, title) {
+      const normC = normalizeCompanyName(company) || String(company || "").trim().toLowerCase();
+      const normT = normalizeJobTitle(title) || String(title || "").trim().toLowerCase();
+      return sha256(`${normC}_${normT}`);
+    }
+
+    // =========================================================================
     // MODAL 1: TAMBAH LOWONGAN / LAMARAN MANUAL
     // =========================================================================
     function openAddModal() {
@@ -1167,11 +1200,6 @@
       else box.classList.remove("hidden");
     }
 
-    async function sha256(str) {
-      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
-    }
-
     async function saveManualJob() {
       const title = document.getElementById("inTitle").value.trim();
       const company = document.getElementById("inCompany").value.trim();
@@ -1182,7 +1210,10 @@
       btn.disabled = true;
 
       const closingVal = document.getElementById("inClosingDate").value;
+      const sourceVal = document.getElementById("inSource").value.trim() || "Manual";
+      const canonicalHash = await generateNormalizedHash(company, title);
       const extHash = await sha256(`${company.toLowerCase()}_${title.toLowerCase()}_${Date.now()}`);
+
       const { data: insertedJob, error } = await sb.from("job_listings").insert({
         external_hash: extHash,
         title,
@@ -1190,7 +1221,7 @@
         role_cluster: document.getElementById("inCluster").value,
         work_mode: document.getElementById("inMode").value,
         location: document.getElementById("inLocation").value.trim() || "Malang, East Java",
-        source: document.getElementById("inSource").value.trim() || "Manual",
+        source: sourceVal,
         job_url,
         posted_at: new Date().toISOString(),
         closing_at: closingVal ? new Date(closingVal + "T23:59:59").toISOString() : null
@@ -1200,6 +1231,12 @@
         btn.disabled = false;
         return alert("Gagal menyimpan lowongan: " + error.message);
       }
+
+      // Daftarkan sidik jari normalisasi ke memori permanen agar scraper tidak menarik ulang lowongan yang sama
+      await sb.from("seen_job_hashes").upsert([
+        { external_hash: canonicalHash, title, company, source: sourceVal },
+        { external_hash: extHash, title, company, source: sourceVal }
+      ], { onConflict: "external_hash" });
 
       const initialStatus = document.getElementById("inInitialStatus").value;
       if (initialStatus !== "Wishlist" && insertedJob) {
@@ -1323,9 +1360,33 @@
 
     async function deleteJob(jobId) {
       if (!confirm("Hapus data ini secara permanen?")) return;
+      const rec = allRecords.find(r => r.id === jobId);
+
+      // Pastikan sidik jari lowongan tercatat di seen_job_hashes sebelum dihapus dari radar
+      if (rec) {
+        const canonicalHash = await generateNormalizedHash(rec.company, rec.title);
+        const hashRows = [
+          {
+            external_hash: canonicalHash,
+            title: rec.title || null,
+            company: rec.company || null,
+            source: rec.source || null
+          }
+        ];
+        if (rec.external_hash && rec.external_hash !== canonicalHash) {
+          hashRows.push({
+            external_hash: rec.external_hash,
+            title: rec.title || null,
+            company: rec.company || null,
+            source: rec.source || null
+          });
+        }
+        await sb.from("seen_job_hashes").upsert(hashRows, { onConflict: "external_hash" });
+      }
+
       const { error } = await sb.from("job_listings").delete().eq("id", jobId);
       if (error) return alert("Gagal menghapus: " + error.message);
-      showToast("Data dihapus");
+      showToast("Data dihapus & ditandai agar tidak muncul ulang");
       fetchAllData();
     }
 
